@@ -1,23 +1,12 @@
-// ════════════════════════════════════════════════
-// Fredinho — Service Worker
-// Versão: 1.0
-// ════════════════════════════════════════════════
+const CACHE_NAME = 'fredinho-v2';
 
-const CACHE_NAME = 'fredinho-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-];
-
-// ── Instalação: cacheia assets principais ──
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).catch(() => {})
+    caches.open(CACHE_NAME).then(cache => cache.addAll(['/index.html'])).catch(()=>{})
   );
 });
 
-// ── Ativação: limpa caches antigos ──
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -26,7 +15,6 @@ self.addEventListener('activate', e => {
   );
 });
 
-// ── Fetch: serve do cache quando offline ──
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
@@ -34,33 +22,22 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// ── Push: exibe notificação quando chega mensagem ──
 self.addEventListener('push', e => {
   let data = { title: 'Fredinho', body: 'Você tem um novo convite.', url: '/' };
-  try {
-    if (e.data) data = { ...data, ...e.data.json() };
-  } catch (_) {
-    if (e.data) data.body = e.data.text();
-  }
-
-  const options = {
-    body:    data.body,
-    icon:    '/icons/icon-192.png',
-    badge:   '/icons/icon-192.png',
-    image:   data.image || undefined,
-    data:    { url: data.url || '/' },
-    vibrate: [100, 50, 100],
-    actions: data.actions || [],
-    tag:     data.tag || 'fredinho-notif',
-    renotify: true,
-  };
-
+  try { if (e.data) data = { ...data, ...e.data.json() }; } catch (_) {}
   e.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    '/icons/icon-192.png',
+      badge:   '/icons/icon-192.png',
+      data:    { url: data.url || '/' },
+      vibrate: [100, 50, 100],
+      tag:     'fredinho-notif',
+      renotify: true,
+    })
   );
 });
 
-// ── Clique na notificação: abre o app ──
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const url = e.notification.data?.url || '/';

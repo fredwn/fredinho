@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script>
-  // GitHub Pages 404 hack — redireciona para index.html preservando o path
-  const path = window.location.pathname.replace('/fredinho', '') || '/';
-  window.location.replace('/fredinho/' + window.location.search + window.location.hash);
+  window.location.replace('/' + window.location.search + window.location.hash);
 </script>
 </head>
 <body></body>

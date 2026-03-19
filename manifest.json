@@ -3,6 +3,7 @@
   "short_name": "Fredinho",
   "description": "Seu perfil gastronômico personalizado",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#EFEFED",
   "theme_color": "#EFEFED",
