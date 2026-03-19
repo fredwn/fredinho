@@ -416,15 +416,38 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
       </div>
       <button class="btn-p" onclick="submitFinal()">Validar →</button>
     </div>
+  </div>
+</div>
 
-    <div class="member-card" id="member-card">
-      <div class="member-left">
-        <span class="member-lbl">Weissmann, acesso nº</span>
-        <span class="member-num" id="arch-member-num">—</span>
-      </div>
+<!-- ════ TELA FINAL — Celebração + Compartilhar ════ -->
+<div id="s-final" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.15"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 32px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
+
+    <div style="opacity:0;animation:fsu .6s .1s var(--tr) forwards;margin-bottom:32px">
+      <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pedra);margin-bottom:6px">Weissmann, acesso nº</div>
+      <div id="final-member-num" style="font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--ambar);letter-spacing:4px;line-height:1">—</div>
     </div>
-    <div class="share-row">
-      <button class="btn-share" onclick="shareProfile()">Compartilhar</button>
+
+    <div style="opacity:0;animation:fsu .6s .32s var(--tr) forwards;margin-bottom:36px">
+      <div id="final-headline" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7.5vw,38px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme)">Seu perfil está pronto.</div>
+      <div style="font-size:14px;color:var(--pedra);margin-top:10px;line-height:1.65;font-weight:300">Os próximos convites chegarão quando a experiência encaixar exatamente no que você gosta.</div>
+    </div>
+
+    <div style="opacity:0;animation:fsu .6s .52s var(--tr) forwards;display:flex;flex-direction:column;gap:12px">
+
+      <div style="background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px 20px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="shareWithFriend()">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--creme);margin-bottom:6px">Compartilhar com um amigo</div>
+        <div style="font-size:12px;color:var(--pedra);line-height:1.65;margin-bottom:14px">Queremos conhecer melhor seus amigos para criar oportunidades cada vez melhores para que vocês possam estar juntos.</div>
+        <div style="font-size:12px;font-weight:600;color:var(--terra)">Convidar →</div>
+      </div>
+
+      <div style="background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px 20px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="shareWithRestaurant()">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--creme);margin-bottom:6px">Compartilhar com um restaurante</div>
+        <div style="font-size:12px;color:var(--pedra);line-height:1.65;margin-bottom:14px">Muitos restaurantes sonham em criar experiências personalizadas para você, só não sabem por onde começar.</div>
+        <div style="font-size:12px;font-weight:600;color:var(--terra)">Apresentar meu perfil →</div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -441,6 +464,30 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 </div>
 
 <div id="toast"></div>
+
+<!-- ════ MODAL iOS — Instalar PWA para push ════ -->
+<div id="ios-install-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(28,20,16,.55);align-items:flex-end;justify-content:center">
+  <div style="background:#FAFAF8;border-radius:4px 4px 0 0;padding:28px 28px max(env(safe-area-inset-bottom),28px);width:100%;max-width:480px;animation:fsu .35s var(--tr)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;color:var(--creme);margin-bottom:8px">Para receber no iPhone</div>
+    <div style="font-size:13px;color:var(--pedra);line-height:1.7;margin-bottom:20px">As notificações push no iPhone funcionam quando o Fredinho está salvo na sua tela inicial.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">1</div>
+        <div style="font-size:13px;color:var(--creme)">Toque no ícone <strong>Compartilhar</strong> na barra do Safari (□↑)</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">2</div>
+        <div style="font-size:13px;color:var(--creme)">Selecione <strong>Adicionar à Tela de Início</strong></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">3</div>
+        <div style="font-size:13px;color:var(--creme)">Abra o Fredinho pela tela inicial e aceite as notificações</div>
+      </div>
+    </div>
+    <button class="btn-p" onclick="document.getElementById('ios-install-modal').style.display='none'">Entendi</button>
+    <p style="font-size:11px;color:var(--pedra);text-align:center;margin-top:12px;cursor:pointer" onclick="document.getElementById('ios-install-modal').style.display='none'">Agora não</p>
+  </div>
+</div>
 
 <script>
 const SB_URL='https://jebhatmtzhoxoklfxzgh.supabase.co';
@@ -497,7 +544,7 @@ let swRegistration=null;
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      swRegistration=await navigator.serviceWorker.register('/fredinho/sw.js',{scope:'/fredinho/'});
+      swRegistration=await navigator.serviceWorker.register('/sw.js',{scope:'/'});
       console.log('[SW] registrado');
     }catch(e){
       console.warn('[SW] falhou:',e);
@@ -1270,20 +1317,48 @@ async function submitFinal(){
     });
   }catch(e){console.warn(e);}
 
-  // Push: solicita permissão se ativado
-  if(activeChannels.has('push')&&user.user_id){
-    await requestPushPermission(user.user_id);
+  // Push: pede permissão AGORA dentro do click — antes de qualquer setTimeout
+  if(activeChannels.has('push')){
+    if(isIOS&&!isInStandaloneMode){
+      // iOS sem PWA instalado
+      setTimeout(()=>showIOSInstallModal(),900);
+    } else {
+      // Android/Desktop — dialog nativo dentro da cadeia de click
+      await requestPushPermission(user.user_id);
+    }
   }
 
-  // Mostra cartão de membro
-  const mc=document.getElementById('member-card');
-  mc.style.display='flex';mc.style.opacity='0';
-  document.getElementById('arch-member-num').textContent=user.member_number;
-  setTimeout(()=>{mc.style.transition='opacity .6s';mc.style.opacity='1';},50);
+  toast('Bem-vindo. Você receberá seu primeiro convite em breve.');
+  launchConfetti(ARCH[calcArchetype().primary]?.ring||'#8B3A1E');
 
+  // Atualiza link do Telegram com member_number confirmado
+  if(activeChannels.has('telegram')) updateTelegramLink();
+
+  // Navega para tela final
+  document.getElementById('final-member-num').textContent=user.member_number;
   const fn=user.name?user.name.split(' ')[0]:'';
-  toast(`Bem-vindo. Você receberá seu primeiro convite em breve.`);
-  launchConfetti(ARCH[calcArchetype().primary]?.ring||'#B85C38');
+  if(fn) document.getElementById('final-headline').textContent=`${fn}, seu perfil está pronto.`;
+  setTimeout(()=>go('s-final'),800);
+}
+
+async function promptPushAfterSubmit(){
+  if(!activeChannels.has('push')) return; // usuário não ativou push
+
+  if(isIOS&&!isInStandaloneMode){
+    // iOS sem PWA — mostra modal com instruções de instalação
+    showIOSInstallModal();
+    return;
+  }
+
+  if(!('Notification' in window)||!('PushManager' in window)) return;
+
+  // Android/Desktop — pede permissão diretamente (estamos dentro de click chain)
+  await requestPushPermission(user.user_id);
+}
+
+function showIOSInstallModal(){
+  const modal=document.getElementById('ios-install-modal');
+  if(modal) modal.style.display='flex';
 }
 
 // ── Canais de notificação — multi-select ──
@@ -1297,7 +1372,6 @@ function toggleChannel(el){
   if(isActive) activeChannels.add(ch);
   else activeChannels.delete(ch);
 
-  // Telegram: mostra/esconde painel de conexão
   if(ch==='telegram'){
     const panel=document.getElementById('telegram-connect');
     panel.style.display=isActive?'block':'none';
@@ -1310,12 +1384,12 @@ function toggleChannel(el){
 }
 
 function updateTelegramLink(){
-  // Link deep-link para o bot com o user_id como parâmetro de start
-  // O bot captura o chat_id e associa ao user_id no webhook
-  const BOT_USERNAME='FredinhoWeissmannBot'; // trocar pelo username real do bot
-  const startParam=user.user_id||user.member_number||'new';
+  const BOT_USERNAME='ListadoFredinho_bot';
+  // member_number é gerado localmente em saveInitial — sempre disponível
+  const startParam=user.member_number||user.user_id||'new';
   const link=`https://t.me/${BOT_USERNAME}?start=${startParam}`;
-  document.getElementById('telegram-link').href=link;
+  const el=document.getElementById('telegram-link');
+  if(el) el.href=link;
 }
 
 function onTelegramClick(){
@@ -1352,12 +1426,35 @@ function toggleArchDetail(){
   const d=document.getElementById('arch-detail');
   document.querySelector('.arch-more-btn').textContent=d.classList.toggle('open')?'Fechar ↑':'Entender meu perfil em profundidade ↓';
 }
-function shareProfile(){
-  const a=ARCH[calcArchetype().primary]||ARCH.habitue;
-  const txt=`Descobri meu perfil gastronômico com o Fredinho: ${a.name} — "${a.tagline}" 🍽️`;
-  if(navigator.share) navigator.share({title:'Meu perfil Fredinho',text:txt,url:window.location.href}).catch(()=>{});
-  else{navigator.clipboard?.writeText(txt+'\n'+window.location.href);toast('Link copiado! 🔗');}
+function shareWithFriend(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  const url=window.location.href.split('?')[0]+(user.source_restaurant?`?r=${user.source_restaurant}`:'');
+  const txt=fn
+    ?`${fn} me convidou para montar um perfil gastronômico juntos no Fredinho. Leva dois minutos e vira convites personalizados para experiências que fazem sentido para nós dois.`
+    :`Me convidaram para montar um perfil gastronômico no Fredinho. Leva dois minutos e vira convites personalizados para experiências que fazem sentido para nós dois.`;
+  if(navigator.share){
+    navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(txt+'\n'+url);
+    toast('Link copiado!');
+  }
 }
+
+function shareWithRestaurant(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  const url=window.location.href.split('?')[0]+(user.source_restaurant?`?r=${user.source_restaurant}`:'');
+  const txt=fn
+    ?`${fn} quer receber convites personalizados do seu restaurante. O perfil gastronômico já está pronto — basta conectar ao Fredinho.`
+    :`Um cliente quer receber convites personalizados do seu restaurante. O perfil gastronômico já está pronto — basta conectar ao Fredinho.`;
+  if(navigator.share){
+    navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(txt+'\n'+url);
+    toast('Link copiado!');
+  }
+}
+
+function shareProfile(){shareWithFriend();}
 function launchConfetti(color){
   const cols=[color,'#D4A053','#F2E8DC','#B85C38'];
   for(let i=0;i<40;i++) setTimeout(()=>{
