@@ -1230,7 +1230,25 @@ function showFeedback(msg){
 }
 
 async function saveInitial(){
-  user.member_number=String(1000+Math.floor(Math.random()*9000));
+  // Recupera user_id persistido — evita criar perfil duplicado a cada sessão
+  const savedId = localStorage.getItem('fredinho_user_id');
+  const savedMember = localStorage.getItem('fredinho_member_number');
+
+  if(savedId){
+    // Já existe — só atualiza nome se mudou
+    user.user_id = savedId;
+    user.member_number = savedMember || user.member_number;
+    try{
+      await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+        method:'PATCH', headers:SB_H,
+        body:JSON.stringify({ name:user.name })
+      });
+    }catch(e){console.warn(e);}
+    return;
+  }
+
+  // Novo usuário — gera member_number e cria perfil
+  user.member_number = String(1000+Math.floor(Math.random()*9000));
   try{
     const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
     const rData=await rRes.json();
@@ -1247,7 +1265,12 @@ async function saveInitial(){
       })
     });
     const d=await res.json();
-    if(d[0]) user.user_id=d[0].user_id;
+    if(d[0]){
+      user.user_id=d[0].user_id;
+      // Persiste para não duplicar em sessões futuras
+      localStorage.setItem('fredinho_user_id', user.user_id);
+      localStorage.setItem('fredinho_member_number', user.member_number);
+    }
   }catch(e){console.warn(e);}
 }
 
@@ -1285,6 +1308,47 @@ async function saveProgress(final=false){
   }catch(e){console.warn(e);}
 }
 
+async function mergeProfiles(existingId, tempId){
+  // Copia dados do perfil temporário para o perfil existente
+  // e remove o duplicado
+  try{
+    const tempRes = await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${tempId}&select=*`,{headers:SB_H});
+    const tempData = await tempRes.json();
+    const temp = tempData[0];
+    if(!temp) return;
+
+    // Campos que valem a pena trazer do perfil novo (dados da jornada atual)
+    const mergeFields = {};
+    if(temp.liked_ids?.length)      mergeFields.liked_ids      = temp.liked_ids;
+    if(temp.cards_completed > 0)    mergeFields.cards_completed = temp.cards_completed;
+    if(temp.primary_archetype)      mergeFields.primary_archetype = temp.primary_archetype;
+    if(temp.secondary_archetype)    mergeFields.secondary_archetype = temp.secondary_archetype;
+    if(temp.archetype_scores)       mergeFields.archetype_scores = temp.archetype_scores;
+    if(temp.familia?.length)        mergeFields.familia        = temp.familia;
+    if(temp.saude?.length)          mergeFields.saude          = temp.saude;
+    if(temp.vegano)                 mergeFields.vegano         = temp.vegano;
+    if(temp.dieta?.length)          mergeFields.dieta          = temp.dieta;
+    if(temp.alergias?.length)       mergeFields.alergias       = temp.alergias;
+    if(temp.completed_at)           mergeFields.completed_at   = temp.completed_at;
+    mergeFields.last_card_at = temp.last_card_at || new Date().toISOString();
+
+    // Aplica no perfil existente
+    if(Object.keys(mergeFields).length > 0){
+      await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${existingId}`,{
+        method:'PATCH', headers:SB_H,
+        body:JSON.stringify(mergeFields)
+      });
+    }
+
+    // Remove o perfil temporário duplicado
+    await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${tempId}`,{
+      method:'DELETE', headers:SB_H
+    });
+
+    console.log('Merge concluído — perfil duplicado removido');
+  }catch(e){ console.warn('Erro no merge:', e); }
+}
+
 async function submitFinal(){
   const wp=document.getElementById('f-wp').value.trim();
   const home=document.getElementById('f-home').value.trim();
@@ -1296,6 +1360,20 @@ async function submitFinal(){
   user.accepts_marketing=document.getElementById('f-consent').checked;
   if(!user.user_id) await saveInitial();
 
+  // ── Verifica duplicata por WhatsApp ─────────────────────────────
+  const wpE164 = user.whatsapp.replace(/\D/g,'').replace(/^0/,'55').replace(/^(?!55)/,'55');
+  try{
+    const dupRes = await fetch(`${SB_URL}/rest/v1/user_profiles?whatsapp_e164=eq.${wpE164}&user_id=neq.${user.user_id}&select=user_id&limit=1`,{headers:SB_H});
+    const dupData = await dupRes.json();
+    if(dupData[0]){
+      // Existe perfil anterior com esse WhatsApp — faz merge e assume o user_id antigo
+      const existingId = dupData[0].user_id;
+      await mergeProfiles(existingId, user.user_id);
+      user.user_id = existingId;
+      localStorage.setItem('fredinho_user_id', existingId);
+    }
+  }catch(e){ console.warn('Erro na verificação de duplicata:', e); }
+
   // Salva WhatsApp + canais + opt-in
   const channels=[...activeChannels];
   try{
@@ -1303,13 +1381,13 @@ async function submitFinal(){
       method:'PATCH',headers:SB_H,
       body:JSON.stringify({
         whatsapp:user.whatsapp,
-        whatsapp_e164:user.whatsapp.replace(/\D/g,'').replace(/^0/,'55').replace(/^(?!55)/,'55'),
+        whatsapp_e164:wpE164,
         neighborhood_home:user.neighborhood_home,
         neighborhood_work:user.neighborhood_work,
-        notification_channels:channels,          // array: ['whatsapp','push','rcs']
-        notification_channel:channels.join(','),  // legado string
+        notification_channels:channels,
+        notification_channel:channels.join(','),
         accepts_marketing:user.accepts_marketing,
-        optin_at:new Date().toISOString(),        // timestamp do aceite formal
+        optin_at:new Date().toISOString(),
         optin_source:'fredinho_onboarding',
         telegram_pending:activeChannels.has('telegram')?true:undefined,
         telegram_start_param:activeChannels.has('telegram')?user.member_number:undefined,
