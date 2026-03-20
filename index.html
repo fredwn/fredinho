@@ -838,10 +838,11 @@ function updateTierScore(card,dir){
   }
 }
 function getTier(){
-  // Âncora R$690 (id:100): like = AAA, pass = não AAA
-  // Threshold baixo para garantir que like no 690 seja suficiente
+  // Escala gradual — âncora R$690 vale 4pts, cards mid valem 1-2pts
+  // like na âncora AAA (690) + qualquer card mid = ainda AAA
+  // pass na âncora AAA mas likes em cards mid = mid
   if(tierScore>=4) return 'aaa';
-  if(tierScore>=2) return 'mid';
+  if(tierScore>=1) return 'mid';
   return 'valor';
 }
 function checkEarlyExit(){
@@ -1227,13 +1228,31 @@ async function saveInitial(){
   const savedMember = localStorage.getItem('fredinho_member_number');
 
   if(savedId){
-    // Já existe — só atualiza nome se mudou
+    // Perfil existente — atualiza nome e reseta dados de onboarding para nova jornada
     user.user_id = savedId;
     user.member_number = savedMember || user.member_number;
     try{
       await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
         method:'PATCH', headers:SB_H,
-        body:JSON.stringify({ name:user.name })
+        body:JSON.stringify({
+          name: user.name,
+          // Reseta campos da jornada para que nova passagem substitua a anterior
+          cards_completed: 0,
+          liked_ids: [],
+          onboarding_completed: false,
+          primary_archetype: null,
+          secondary_archetype: null,
+          archetype_scores: null,
+          tier: null,
+          tier_score: 0,
+          alimentacao: null,
+          contextos: null,
+          filhos: null,
+          dieta: null,
+          vegano: false,
+          alergia_grave: false,
+          alergias: null,
+        })
       });
     }catch(e){console.warn(e);}
     return;
@@ -1484,7 +1503,20 @@ function selNotif(el){
 
 async function goToFinal(){
   await saveProgress(true);
-  const r=calcArchetype();const fn=user.name?user.name.split(' ')[0]:'';
+  const r=calcArchetype();
+  // Persiste arquétipo calculado no perfil
+  if(user.user_id && r.primary){
+    fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+      method:'PATCH', headers:SB_H,
+      body:JSON.stringify({
+        primary_archetype:   r.primary,
+        secondary_archetype: r.secondary||null,
+        archetype_scores:    r.scores,
+        onboarding_completed: true,
+      })
+    }).catch(e=>console.warn('Erro ao salvar arquétipo:',e));
+  }
+  const fn=user.name?user.name.split(' ')[0]:'';
   document.getElementById('arch-eyebrow-lbl').textContent='Weissmann';
   document.getElementById('cta-title').innerHTML=fn
     ?`${fn}, obrigado.`
