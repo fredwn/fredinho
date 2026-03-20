@@ -1230,14 +1230,14 @@ async function saveInitial(){
   if(savedId){
     // Verifica se o perfil ainda existe no banco antes de assumir que pode atualizar
     try{
-      const checkRes = await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${savedId}&select=user_id`,{headers:SB_H});
+      const checkRes = await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${savedId}&select=user_id`,{headers:SB_H});
       const checkData = await checkRes.json();
 
       if(checkData && checkData.length > 0){
         // Perfil existe — atualiza nome e reseta dados de onboarding para nova jornada
         user.user_id = savedId;
         user.member_number = savedMember || user.member_number;
-        await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+        await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
           method:'PATCH', headers:SB_H,
           body:JSON.stringify({
             name: user.name,
@@ -1274,7 +1274,7 @@ async function saveInitial(){
     const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
     const rData=await rRes.json();
     const restaurantUUID=rData[0]?.id||null;
-    const res=await fetch(`${SB_URL}/rest/v1/user_profiles`,{
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{
       method:'POST',
       headers:{...SB_H,'Prefer':'return=representation'},
       body:JSON.stringify({
@@ -1296,44 +1296,64 @@ async function saveInitial(){
 }
 
 async function saveProgress(final=false){
-  if(!user.user_id)return;
-  const p={
-    familia:user.familia,saude:user.saude,
-    liked_ids:liked.map(e=>e.id),
-    cards_completed:ANCHORS.length+deckPos,
-    // eixos — escala 0-4 cada
-    axis_foodie:axisScores.foodie||0,
-    axis_classico:axisScores.classico||0,
-    axis_sustentavel:axisScores.sustentavel||0,
-    axis_social:axisScores.social||0,
-    axis_exclusivo:axisScores.exclusivo||0,
-    axis_bohemio:axisScores.bohemio||0,
-    // tier e contexto
-    tier:getTier(),
-    tier_score:tierScore,
-    alimentacao:user.alimentacao||null,
-    dieta:user.dieta.length?user.dieta:null,
-    contextos:user.contextos.length?user.contextos:null,
-    filhos:user.filhos.length?user.filhos:null,
-    alergia_grave:user.alergia_grave||false,
-    alergias:user.alergias.length?user.alergias:null,
-    vegano:user.vegano||false,
-    liked_premium:liked.some(e=>e.id===100),
-    liked_acessivel:liked.some(e=>e.id===101),
-    last_card_at:new Date().toISOString()
+  if(!user.user_id) return;
+
+  // ── user_onboardings — dados da jornada de cards ─────────────────
+  const onboarding = {
+    user_id:              user.user_id,
+    category:             'gastronomia',
+    liked_ids:            liked.map(e=>e.id),
+    cards_completed:      ANCHORS.length+deckPos,
+    axis_foodie:          axisScores.foodie||0,
+    axis_classico:        axisScores.classico||0,
+    axis_sustentavel:     axisScores.sustentavel||0,
+    axis_social:          axisScores.social||0,
+    axis_exclusivo:       axisScores.exclusivo||0,
+    axis_bohemio:         axisScores.bohemio||0,
+    tier:                 getTier(),
+    tier_score:           tierScore,
+    last_card_at:         new Date().toISOString(),
+    onboarding_completed: false,
   };
-  if(final) p.completed_at=new Date().toISOString();
+  if(final){
+    onboarding.onboarding_completed = true;
+    onboarding.completed_at = new Date().toISOString();
+  }
+
+  // ── user_preferences — preferências alimentares e contexto ───────
+  const prefs = {
+    user_id:       user.user_id,
+    alimentacao:   user.alimentacao||null,
+    dieta:         user.dieta.length?user.dieta:null,
+    contextos:     user.contextos.length?user.contextos:null,
+    filhos:        user.filhos.length?user.filhos:null,
+    alergia_grave: user.alergia_grave||false,
+    alergias:      user.alergias.length?user.alergias:null,
+    vegano:        user.vegano||false,
+    updated_at:    new Date().toISOString(),
+  };
+
   try{
-    await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,
-      {method:'PATCH',headers:SB_H,body:JSON.stringify(p)});
-  }catch(e){console.warn(e);}
+    // Upsert em user_onboardings (unique: user_id + category)
+    await fetch(`${SB_URL}/rest/v1/user_onboardings`,{
+      method:'POST',
+      headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(onboarding)
+    });
+    // Upsert em user_preferences (PK: user_id)
+    await fetch(`${SB_URL}/rest/v1/user_preferences`,{
+      method:'POST',
+      headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(prefs)
+    });
+  }catch(e){console.warn('saveProgress error:',e);}
 }
 
 async function mergeProfiles(existingId, tempId){
   // Copia dados do perfil temporário para o perfil existente
   // e remove o duplicado
   try{
-    const tempRes = await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${tempId}&select=*`,{headers:SB_H});
+    const tempRes = await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${tempId}&select=*`,{headers:SB_H});
     const tempData = await tempRes.json();
     const temp = tempData[0];
     if(!temp) return;
@@ -1355,14 +1375,14 @@ async function mergeProfiles(existingId, tempId){
 
     // Aplica no perfil existente
     if(Object.keys(mergeFields).length > 0){
-      await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${existingId}`,{
+      await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${existingId}`,{
         method:'PATCH', headers:SB_H,
         body:JSON.stringify(mergeFields)
       });
     }
 
     // Remove o perfil temporário duplicado
-    await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${tempId}`,{
+    await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${tempId}`,{
       method:'DELETE', headers:SB_H
     });
 
@@ -1384,7 +1404,7 @@ async function submitFinal(){
   // ── Verifica duplicata por WhatsApp ─────────────────────────────
   const wpE164 = user.whatsapp.replace(/\D/g,'').replace(/^0/,'55').replace(/^(?!55)/,'55');
   try{
-    const dupRes = await fetch(`${SB_URL}/rest/v1/user_profiles?whatsapp_e164=eq.${wpE164}&user_id=neq.${user.user_id}&select=user_id&limit=1`,{headers:SB_H});
+    const dupRes = await fetch(`${SB_URL}/rest/v1/users?whatsapp_e164=eq.${wpE164}&user_id=neq.${user.user_id}&select=user_id&limit=1`,{headers:SB_H});
     const dupData = await dupRes.json();
     if(dupData[0]){
       // Existe perfil anterior com esse WhatsApp — faz merge e assume o user_id antigo
@@ -1395,23 +1415,23 @@ async function submitFinal(){
     }
   }catch(e){ console.warn('Erro na verificação de duplicata:', e); }
 
-  // Salva WhatsApp + canais + opt-in
+  // Salva WhatsApp + canais + opt-in em users
   const channels=[...activeChannels];
   try{
-    await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+    await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
       method:'PATCH',headers:SB_H,
       body:JSON.stringify({
-        whatsapp:user.whatsapp,
-        whatsapp_e164:wpE164,
-        neighborhood_home:user.neighborhood_home,
-        neighborhood_work:user.neighborhood_work,
-        notification_channels:channels,
-        notification_channel:channels.join(','),
-        accepts_marketing:user.accepts_marketing,
-        optin_at:new Date().toISOString(),
-        optin_source:'fredinho_onboarding',
-        telegram_pending:activeChannels.has('telegram')?true:undefined,
-        telegram_start_param:activeChannels.has('telegram')?user.member_number:undefined,
+        whatsapp:              user.whatsapp,
+        whatsapp_e164:         wpE164,
+        neighborhood_home:     user.neighborhood_home,
+        neighborhood_work:     user.neighborhood_work,
+        notification_channels: channels,
+        accepts_marketing:     user.accepts_marketing,
+        optin_at:              new Date().toISOString(),
+        optin_source:          'fredinho_onboarding',
+        telegram_pending:      activeChannels.has('telegram')?true:undefined,
+        telegram_start_param:  activeChannels.has('telegram')?user.member_number:undefined,
+        updated_at:            new Date().toISOString(),
       })
     });
   }catch(e){console.warn(e);}
@@ -1499,7 +1519,7 @@ function onTelegramClick(){
   status.textContent='Aguardando conexão… Após apertar Iniciar no bot, seu Telegram estará vinculado.';
   // Salva tentativa no Supabase para o webhook do bot completar
   if(user.user_id){
-    fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
       method:'PATCH',headers:SB_H,
       body:JSON.stringify({telegram_pending:true,telegram_start_param:user.member_number})
     }).catch(()=>{});
@@ -1514,15 +1534,18 @@ function selNotif(el){
 async function goToFinal(){
   await saveProgress(true);
   const r=calcArchetype();
-  // Persiste arquétipo calculado no perfil
+  // Persiste arquétipo calculado em user_onboardings
   if(user.user_id && r.primary){
-    fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
-      method:'PATCH', headers:SB_H,
+    fetch(`${SB_URL}/rest/v1/user_onboardings`,{
+      method:'POST',
+      headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
       body:JSON.stringify({
-        primary_archetype:   r.primary,
-        secondary_archetype: r.secondary||null,
-        archetype_scores:    r.scores,
+        user_id:              user.user_id,
+        category:             'gastronomia',
+        primary_archetype:    r.primary,
+        secondary_archetype:  r.secondary||null,
         onboarding_completed: true,
+        completed_at:         new Date().toISOString(),
       })
     }).catch(e=>console.warn('Erro ao salvar arquétipo:',e));
   }
