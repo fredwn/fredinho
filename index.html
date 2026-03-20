@@ -1228,34 +1228,44 @@ async function saveInitial(){
   const savedMember = localStorage.getItem('fredinho_member_number');
 
   if(savedId){
-    // Perfil existente — atualiza nome e reseta dados de onboarding para nova jornada
-    user.user_id = savedId;
-    user.member_number = savedMember || user.member_number;
+    // Verifica se o perfil ainda existe no banco antes de assumir que pode atualizar
     try{
-      await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
-        method:'PATCH', headers:SB_H,
-        body:JSON.stringify({
-          name: user.name,
-          // Reseta campos da jornada para que nova passagem substitua a anterior
-          cards_completed: 0,
-          liked_ids: [],
-          onboarding_completed: false,
-          primary_archetype: null,
-          secondary_archetype: null,
-          archetype_scores: null,
-          tier: null,
-          tier_score: 0,
-          alimentacao: null,
-          contextos: null,
-          filhos: null,
-          dieta: null,
-          vegano: false,
-          alergia_grave: false,
-          alergias: null,
-        })
-      });
-    }catch(e){console.warn(e);}
-    return;
+      const checkRes = await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${savedId}&select=user_id`,{headers:SB_H});
+      const checkData = await checkRes.json();
+
+      if(checkData && checkData.length > 0){
+        // Perfil existe — atualiza nome e reseta dados de onboarding para nova jornada
+        user.user_id = savedId;
+        user.member_number = savedMember || user.member_number;
+        await fetch(`${SB_URL}/rest/v1/user_profiles?user_id=eq.${user.user_id}`,{
+          method:'PATCH', headers:SB_H,
+          body:JSON.stringify({
+            name: user.name,
+            cards_completed: 0,
+            liked_ids: [],
+            onboarding_completed: false,
+            primary_archetype: null,
+            secondary_archetype: null,
+            archetype_scores: null,
+            tier: null,
+            tier_score: 0,
+            alimentacao: null,
+            contextos: null,
+            filhos: null,
+            dieta: null,
+            vegano: false,
+            alergia_grave: false,
+            alergias: null,
+          })
+        });
+        return;
+      } else {
+        // Perfil foi deletado — limpa localStorage e cria novo
+        console.log('[Fredinho] Perfil não encontrado no banco, criando novo...');
+        localStorage.removeItem('fredinho_user_id');
+        localStorage.removeItem('fredinho_member_number');
+      }
+    }catch(e){ console.warn(e); }
   }
 
   // Novo usuário — gera member_number e cria perfil
