@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fredinho Admin — WEISSMANN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0805;--bg2:#1a0e08;--bg3:#241308;--bg4:#2e1a0c;
+  --terra:#B85C38;--terra2:#c96b44;--terra3:rgba(184,92,56,.12);
+  --creme:#F2E8DC;--creme2:#e0d4c4;--creme3:rgba(242,232,220,.06);
+  --ambar:#D4A053;--ambar2:rgba(212,160,83,.15);
+  --pedra:#8C7B6B;--pedra2:#a49384;
+  --verde:#3daa6d;--verde2:rgba(61,170,109,.12);
+  --roxo:#6d3daa;--roxo2:rgba(109,61,170,.12);
+  --border:rgba(242,232,220,.08);--border2:rgba(242,232,220,.14);
+  --tr:cubic-bezier(.23,1,.32,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;overflow:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(242,232,220,.12);border-radius:10px}
+
+/* ════ LOGIN ════ */
+#login-screen{
+  position:fixed;inset:0;z-index:999;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+}
+.login-box{
+  width:340px;text-align:center;
+  padding:48px 40px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px;
+}
+.login-wordmark{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--ambar);margin-bottom:6px;
+}
+.login-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:600;font-style:italic;
+  color:var(--creme);margin-bottom:32px;line-height:1.1;
+}
+.login-input{
+  width:100%;background:var(--creme3);border:1px solid var(--border);
+  border-radius:10px;padding:13px 16px;font-size:15px;
+  color:var(--creme);outline:none;font-family:'DM Sans',sans-serif;
+  transition:border-color .2s;margin-bottom:14px;
+  -webkit-text-security:disc;text-security:disc;
+  letter-spacing:3px;
+}
+.login-input:focus{border-color:rgba(184,92,56,.5)}
+.login-btn{
+  width:100%;background:var(--terra);color:var(--creme);
+  border:none;border-radius:10px;padding:13px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.login-btn:hover{background:var(--terra2)}
+.login-err{font-size:12px;color:#e05a3a;margin-top:10px;height:16px}
+
+/* ════ SIDEBAR ════ */
+#sidebar{
+  width:220px;flex-shrink:0;
+  height:100vh;overflow-y:auto;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:28px 0 24px;
+}
+.sb-brand{padding:0 20px 28px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.sb-brand-f{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;font-style:italic;color:var(--creme)}
+.sb-brand-w{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--ambar);margin-top:2px}
+.sb-section{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pedra);font-weight:500;padding:0 20px;margin:16px 0 6px}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 20px;cursor:pointer;
+  font-size:13px;font-weight:400;color:var(--pedra2);
+  transition:all .18s;border-left:2px solid transparent;
+  user-select:none;
+}
+.sb-item:hover{color:var(--creme);background:var(--creme3)}
+.sb-item.active{color:var(--creme);background:var(--terra3);border-left-color:var(--terra);font-weight:500}
+.sb-ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--terra3);color:var(--terra);font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;min-width:22px;text-align:center}
+.sb-footer{margin-top:auto;padding:16px 20px 0;border-top:1px solid var(--border)}
+.sb-footer-txt{font-size:11px;color:var(--pedra);line-height:1.6}
+.sb-footer-txt strong{color:var(--ambar);font-weight:500}
+
+/* ════ MAIN ════ */
+#main{flex:1;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;
+  background:rgba(15,8,5,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;font-style:italic;color:var(--creme)}
+.topbar-sub{font-size:12px;color:var(--pedra);margin-top:1px}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+
+/* ── BUTTONS ── */
+.btn{border:none;border-radius:9px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--terra);color:var(--creme)}
+.btn-primary:hover{background:var(--terra2);transform:translateY(-1px)}
+.btn-ghost{background:var(--creme3);color:var(--creme2);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(242,232,220,.1);border-color:var(--border2)}
+.btn-danger{background:rgba(192,83,58,.12);color:#e05a3a;border:1px solid rgba(192,83,58,.2)}
+.btn-danger:hover{background:rgba(192,83,58,.2)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:8px;font-size:14px}
+
+/* ── CONTENT AREA ── */
+.content{padding:28px 32px;flex:1}
+
+/* ── CARDS DE STAT ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;padding:20px;
+  transition:border-color .2s;
+}
+.stat-card:hover{border-color:var(--border2)}
+.stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--pedra);font-weight:500;margin-bottom:8px}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--creme);line-height:1}
+.stat-sub{font-size:11px;color:var(--pedra);margin-top:5px}
+.stat-trend{font-size:11px;color:var(--verde);font-weight:500}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.table-head-title{font-size:13px;font-weight:600;color:var(--creme)}
+.table-filters{display:flex;gap:8px;align-items:center}
+.search-input{background:var(--creme3);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--creme);outline:none;font-family:'DM Sans',sans-serif;width:200px;transition:border-color .2s}
+.search-input::placeholder{color:rgba(242,232,220,.25)}
+.search-input:focus{border-color:rgba(184,92,56,.4)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:11px 16px;text-align:left;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--pedra);font-weight:500;white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(242,232,220,.04);transition:background .15s;cursor:default}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--creme3)}
+td{padding:13px 16px;font-size:13px;color:var(--creme2);vertical-align:middle}
+.td-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* ── PILLS / BADGES ── */
+.pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;white-space:nowrap}
+.pill-green{background:var(--verde2);color:var(--verde)}
+.pill-amber{background:var(--ambar2);color:var(--ambar)}
+.pill-red{background:rgba(192,83,58,.12);color:#e05a3a}
+.pill-purple{background:var(--roxo2);color:#a070e0}
+.pill-gray{background:rgba(140,123,107,.1);color:var(--pedra2)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:18px;width:100%;max-width:620px;
+  max-height:90vh;overflow-y:auto;
+  padding:32px;
+}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;font-style:italic;color:var(--creme);margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--pedra);margin-bottom:28px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.full{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--pedra);font-weight:500}
+.field-input,.field-select,.field-textarea{
+  background:var(--creme3);border:1px solid var(--border);
+  border-radius:9px;padding:11px 13px;font-size:14px;
+  color:var(--creme);outline:none;font-family:'DM Sans',sans-serif;
+  transition:border-color .2s;width:100%;
+}
+.field-input::placeholder,.field-textarea::placeholder{color:rgba(242,232,220,.2)}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:rgba(184,92,56,.5)}
+.field-select{appearance:none;cursor:pointer}
+.field-textarea{resize:vertical;min-height:80px;line-height:1.55}
+.field-hint{font-size:11px;color:var(--pedra);line-height:1.5}
+
+/* ── PESOS DOS ARQUÉTIPOS ── */
+.arch-weights{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.arch-weight-item{
+  background:var(--creme3);border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;
+}
+.arch-weight-name{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--pedra);margin-bottom:6px;font-weight:500}
+.arch-weight-inputs{display:flex;gap:6px}
+.arch-weight-inputs input{
+  flex:1;background:rgba(242,232,220,.04);border:1px solid var(--border);
+  border-radius:6px;padding:5px 7px;font-size:12px;color:var(--creme);
+  outline:none;font-family:'DM Sans',sans-serif;text-align:center;width:100%;
+  transition:border-color .2s;
+}
+.arch-weight-inputs input:focus{border-color:rgba(184,92,56,.4)}
+.arch-weight-sub{font-size:9px;color:var(--pedra);text-align:center;margin-top:3px;letter-spacing:.5px}
+
+/* ── EMPTY STATE ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.empty-ico{font-size:36px;margin-bottom:16px;opacity:.4}
+.empty-txt{font-size:14px;color:var(--pedra);font-weight:300}
+
+/* ── SECTION TABS ── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── ARCH CARDS (arquétipos) ── */
+.arch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:4px}
+.arch-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:14px;padding:18px;cursor:pointer;
+  transition:all .2s;
+}
+.arch-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.arch-card-emoji{font-size:28px;margin-bottom:10px}
+.arch-card-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--creme);margin-bottom:3px}
+.arch-card-tag{font-size:11px;color:var(--pedra);font-style:italic;margin-bottom:10px;line-height:1.4}
+.arch-card-ticket{font-size:11px;color:var(--ambar);font-weight:500}
+
+/* ── ANALYTICS ── */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px}
+.chart-title{font-size:12px;font-weight:600;color:var(--creme);margin-bottom:16px;letter-spacing:.3px}
+.bar-list{display:flex;flex-direction:column;gap:10px}
+.bar-item{display:flex;flex-direction:column;gap:4px}
+.bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--creme2)}
+.bar-label span:last-child{color:var(--pedra);font-size:11px}
+.bar-track{height:6px;background:rgba(242,232,220,.06);border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;transition:width 1s var(--tr)}
+
+/* ── USER PROFILE ROW ── */
+.user-arch-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px}
+.user-liked{font-size:11px;color:var(--pedra);font-family:'DM Sans',sans-serif}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:100px;padding:11px 22px;
+  font-size:13px;color:var(--creme);
+  opacity:0;pointer-events:none;
+  transition:all .35s var(--tr);
+  transform:translateY(8px);
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ── DECK CHIPS ── */
+.deck-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.deck-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--creme3);border:1px solid var(--border);
+  border-radius:100px;padding:5px 10px;
+  font-size:11px;color:var(--creme2);cursor:pointer;
+  transition:all .15s;
+}
+.deck-chip:hover{border-color:var(--border2)}
+.deck-chip.sel{background:var(--terra3);border-color:rgba(184,92,56,.3);color:var(--creme)}
+.deck-chip .rm{color:var(--pedra);font-size:10px;margin-left:2px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s var(--tr) forwards}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-wordmark">Fredinho · Admin</div>
+    <div class="login-title">Weissmann<br>Backoffice</div>
+    <input class="login-input" id="login-pw" type="password" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar →</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ════ SIDEBAR ════ -->
+<nav id="sidebar" style="display:none">
+  <div class="sb-brand">
+    <div class="sb-brand-f">Fredinho</div>
+    <div class="sb-brand-w">Weissmann Admin</div>
+  </div>
+
+  <div class="sb-section">Principal</div>
+  <div class="sb-item active" onclick="nav('analytics')">
+    <span class="sb-ico">📊</span> Analytics
+  </div>
+  <div class="sb-item" onclick="nav('usuarios')">
+    <span class="sb-ico">👤</span> Usuários
+    <span class="sb-badge" id="badge-usuarios">—</span>
+  </div>
+
+  <div class="sb-section">Conteúdo</div>
+  <div class="sb-item" onclick="nav('experiencias')">
+    <span class="sb-ico">🃏</span> Experiências
+    <span class="sb-badge" id="badge-exp">—</span>
+  </div>
+  <div class="sb-item" onclick="nav('arquetipos')">
+    <span class="sb-ico">🎭</span> Arquétipos
+  </div>
+
+  <div class="sb-section">Parceiros</div>
+  <div class="sb-item" onclick="nav('restaurantes')">
+    <span class="sb-ico">🍽️</span> Restaurantes
+    <span class="sb-badge" id="badge-rest">—</span>
+  </div>
+
+  <div class="sb-footer">
+    <div class="sb-footer-txt">Conectado ao<br><strong>Supabase</strong> · jebhatmt…</div>
+  </div>
+</nav>
+
+<!-- ════ MAIN ════ -->
+<div id="main" style="display:none">
+
+  <!-- ── ANALYTICS ── -->
+  <div id="sec-analytics" class="section active">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Analytics</div>
+        <div class="topbar-sub">Visão geral do funil e perfis gerados</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">↺ Atualizar</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card"><div class="stat-label">Usuários totais</div><div class="stat-val" id="st-total">—</div><div class="stat-sub">cadastros iniciados</div></div>
+        <div class="stat-card"><div class="stat-label">Completaram</div><div class="stat-val" id="st-complete">—</div><div class="stat-sub stat-trend" id="st-rate">—% taxa</div></div>
+        <div class="stat-card"><div class="stat-label">WhatsApp capturados</div><div class="stat-val" id="st-wp">—</div><div class="stat-sub">leads ativados</div></div>
+        <div class="stat-card"><div class="stat-label">Arquétipo top</div><div class="stat-val" id="st-arch" style="font-size:22px">—</div><div class="stat-sub" id="st-arch-sub">—</div></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">Distribuição de Arquétipos</div>
+          <div class="bar-list" id="arch-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Cards mais curtidos</div>
+          <div class="bar-list" id="cards-chart"></div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">Perfil familiar (onboarding)</div>
+          <div class="bar-list" id="familia-chart"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Restrições alimentares</div>
+          <div class="bar-list" id="saude-chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── USUÁRIOS ── -->
+  <div id="sec-usuarios" class="section">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Usuários</div>
+        <div class="topbar-sub">Perfis gerados pelo Fredinho</div>
+      </div>
+      <div class="topbar-actions">
+        <input class="search-input" id="search-users" placeholder="Buscar nome ou bairro…" oninput="filterUsers()">
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ CSV</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Arquétipo</th>
+              <th>2º Arq.</th>
+              <th>Bairro</th>
+              <th>WhatsApp</th>
+              <th>Cards ♥</th>
+              <th>Status</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"><tr><td colspan="8"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">Carregando…</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EXPERIÊNCIAS ── -->
+  <div id="sec-experiencias" class="section">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Experiências</div>
+        <div class="topbar-sub">Cards do deck de swipe</div>
+      </div>
+      <div class="topbar-actions">
+        <input class="search-input" id="search-exp" placeholder="Buscar experiência…" oninput="filterExp()">
+        <button class="btn btn-primary btn-sm" onclick="openExpModal()">+ Nova experiência</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Round</th>
+              <th>Preço</th>
+              <th>Duração</th>
+              <th>Status</th>
+              <th style="text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="exp-tbody"><tr><td colspan="7"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">Carregando…</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ARQUÉTIPOS ── -->
+  <div id="sec-arquetipos" class="section">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Arquétipos</div>
+        <div class="topbar-sub">Perfis gastronômicos e pesos de classificação</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="arch-grid" id="arch-grid">
+        <div class="empty" style="grid-column:1/-1"><div class="empty-ico">⏳</div><div class="empty-txt">Carregando…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESTAURANTES ── -->
+  <div id="sec-restaurantes" class="section">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Restaurantes</div>
+        <div class="topbar-sub">Parceiros e seus decks personalizados</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openRestModal()">+ Novo restaurante</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Restaurante</th>
+              <th>Slug / Link</th>
+              <th>Bairro</th>
+              <th>Deck</th>
+              <th>Usuários</th>
+              <th>Status</th>
+              <th style="text-align:right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="rest-tbody"><tr><td colspan="7"><div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">Carregando…</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ════ MODAL EXPERIÊNCIA ════ -->
+<div class="modal-overlay" id="modal-exp">
+  <div class="modal">
+    <div class="modal-title" id="modal-exp-title">Nova Experiência</div>
+    <div class="modal-sub">Configure o card, pesos por arquétipo e status de publicação</div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">Nome da experiência</label>
+        <input class="field-input" id="exp-name" placeholder="Ex: Menu Degustação 7 Tempos">
+      </div>
+      <div class="field">
+        <label class="field-label">Categoria (badge)</label>
+        <input class="field-input" id="exp-cat" placeholder="Ex: ALTA GASTRONOMIA">
+      </div>
+      <div class="field">
+        <label class="field-label">Preço por pessoa</label>
+        <input class="field-input" id="exp-price" placeholder="R$ 280–480">
+      </div>
+      <div class="field">
+        <label class="field-label">Duração</label>
+        <input class="field-input" id="exp-dur" placeholder="2–3h">
+      </div>
+      <div class="field">
+        <label class="field-label">Round</label>
+        <select class="field-select" id="exp-round">
+          <option value="1">Round 1 — Manhã & Tarde</option>
+          <option value="2">Round 2 — Noite & Valores</option>
+          <option value="3">Round 3 — Identidade Premium</option>
+          <option value="4">Round 4 — Raridade & Intimidade</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Status</label>
+        <select class="field-select" id="exp-status">
+          <option value="published">Publicado</option>
+          <option value="draft">Rascunho</option>
+          <option value="archived">Arquivado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field form-grid full" style="margin-top:16px">
+      <label class="field-label">Descrição do card</label>
+      <textarea class="field-textarea" id="exp-desc" placeholder="Texto que aparece no card — máx 120 caracteres"></textarea>
+    </div>
+
+    <div class="field form-grid full" style="margin-top:16px">
+      <label class="field-label">URL da foto</label>
+      <input class="field-input" id="exp-img" placeholder="https://images.unsplash.com/photo-…">
+      <div class="field-hint">Use IDs do Unsplash: https://images.unsplash.com/photo-ID?w=800&q=80</div>
+    </div>
+
+    <!-- Pesos por arquétipo -->
+    <div style="margin-top:22px;margin-bottom:10px">
+      <div class="field-label" style="margin-bottom:4px">Pesos por arquétipo</div>
+      <div class="field-hint" style="margin-bottom:12px">sig = pontos quando CURTIDO · neg = pontos REMOVIDOS quando curtido · pass = pontos removidos quando PASSADO</div>
+      <div class="arch-weights" id="arch-weights-grid"></div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-exp')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveExp()">Salvar experiência</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL ARQUÉTIPO ════ -->
+<div class="modal-overlay" id="modal-arch">
+  <div class="modal">
+    <div class="modal-title" id="modal-arch-title">Editar Arquétipo</div>
+    <div class="modal-sub" id="modal-arch-sub"></div>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">Nome</label>
+        <input class="field-input" id="arch-name-i" placeholder="O Bon Vivant">
+      </div>
+      <div class="field">
+        <label class="field-label">Emoji</label>
+        <input class="field-input" id="arch-emoji-i" placeholder="💎" style="font-size:20px">
+      </div>
+      <div class="field">
+        <label class="field-label">Tagline</label>
+        <input class="field-input" id="arch-tagline-i" placeholder="Prazer refinado. Execução perfeita.">
+      </div>
+      <div class="field">
+        <label class="field-label">Ticket típico</label>
+        <input class="field-input" id="arch-ticket-i" placeholder="R$ 400–1.800+">
+      </div>
+    </div>
+    <div class="field form-grid full" style="margin-top:16px">
+      <label class="field-label">Descrição curta (card)</label>
+      <textarea class="field-textarea" id="arch-desc-i" style="min-height:64px"></textarea>
+    </div>
+    <div class="field form-grid full" style="margin-top:12px">
+      <label class="field-label">Descrição longa (expandida)</label>
+      <textarea class="field-textarea" id="arch-detail-i"></textarea>
+    </div>
+    <div class="field form-grid full" style="margin-top:12px">
+      <label class="field-label">Recomendações (separadas por vírgula)</label>
+      <input class="field-input" id="arch-recs-i" placeholder="Omakase, Degustação, Chef's Table">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-arch')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveArch()">Salvar arquétipo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL RESTAURANTE ════ -->
+<div class="modal-overlay" id="modal-rest">
+  <div class="modal">
+    <div class="modal-title" id="modal-rest-title">Novo Restaurante</div>
+    <div class="modal-sub">Configure o parceiro e selecione as experiências do deck</div>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">Nome do restaurante</label>
+        <input class="field-input" id="rest-name" placeholder="Weissmann Leblon">
+      </div>
+      <div class="field">
+        <label class="field-label">Slug (URL)</label>
+        <input class="field-input" id="rest-slug" placeholder="weissmann-leblon">
+        <div class="field-hint">fredinho.com.br?r=<strong>slug</strong></div>
+      </div>
+      <div class="field">
+        <label class="field-label">Bairro</label>
+        <input class="field-input" id="rest-bairro" placeholder="Leblon">
+      </div>
+      <div class="field">
+        <label class="field-label">Status</label>
+        <select class="field-select" id="rest-status">
+          <option value="active">Ativo</option>
+          <option value="inactive">Inativo</option>
+        </select>
+      </div>
+    </div>
+    <div class="field form-grid full" style="margin-top:16px">
+      <label class="field-label">Deck personalizado</label>
+      <div class="field-hint" style="margin-bottom:8px">Selecione as experiências que aparecem para este restaurante. Deixe vazio para usar o deck padrão completo.</div>
+      <div class="deck-wrap" id="deck-selector"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-rest')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRest()">Salvar restaurante</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════
+const SB_URL='https://jebhatmtzhoxoklfxzgh.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q';
+const SB_H={'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+const ADMIN_PW='weissmann2025';
+
+// ── Arquétipos canônicos (fallback local se Supabase não tiver tabela) ──
+const ARCH_LOCAL={
+  habitue:    {name:'O Habitué',     emoji:'🏡',tagline:'O restaurante é extensão da sua casa',     ticket:'R$ 150–300/sem', desc:'Você frequenta tanto que virou parte do lugar.',                                 detail:'A mesa favorita parece reservada para você. Não é fidelidade — é pertencimento.',                                          recs:'Churrasco Artesanal,Boteco Histórico,Brunch de Domingo,Almoço Executivo',   color:'#B85C38'},
+  jetset:     {name:'O Jet-Set',     emoji:'✨',tagline:'Sofisticação como evento social',           ticket:'R$ 500–1.500+',  desc:'Você sabe exatamente onde estar e quando.',                                     detail:'Exclusividade não é preço — é acesso.',                                                                                    recs:'Edição Limitada,Rooftop Mixology,Chef\'s Table,Experiência Michelin',        color:'#D4A053'},
+  foodie:     {name:'O Foodie',      emoji:'🔥',tagline:'Técnica, origem e a próxima descoberta',   ticket:'R$ 200–600',     desc:'Você não vai a restaurantes para comer. Vai para sentir algo que nunca sentiu.', detail:'Técnica, origem, história — você quer tudo isso no prato.',                                                                recs:'Sushi Omakase,Edição Limitada,Mesa do Fornecedor,Zero Waste Feast',          color:'#B85C38'},
+  atletaurbano:{name:'O Atleta Urbano',emoji:'💪',tagline:'O corpo é seu maior investimento',      ticket:'R$ 100–250',     desc:'Para você, comer bem é parte do treino. Não é restrição — é estratégia.',        detail:'Você quer saber se tem açúcar escondido no molho.',                                                                         recs:'Açaí Pós-Treino,Almoço Fit,Zero Waste Feast,Mesa do Fornecedor',            color:'#3daa6d'},
+  bohemio:    {name:'O Boêmio',      emoji:'🍺',tagline:'Autenticidade que nenhum marketing cria', ticket:'R$ 80–200',      desc:'Qualquer sinal de artifício te afasta.',                                         detail:'Botecos históricos, balcão, o chopp que chegou sem pedir.',                                                                recs:'Boteco Histórico,Jazz & MPB Ao Vivo,Happy Hour,Churrasco Artesanal',         color:'#B85C38'},
+  executivo:  {name:'O Executivo',   emoji:'⚡',tagline:'Eficiência e qualidade não são opostos',  ticket:'R$ 150–400',     desc:'Você transforma qualquer almoço em reunião.',                                    detail:'Mesa discreta, serviço que não interrompe.',                                                                               recs:'Almoço Executivo 45min,Late Breakfast,Couple Signature,Rooftop Mixology',   color:'#8888cc'},
+  consciente: {name:'O Consciente',  emoji:'🌿',tagline:'Prazer e propósito no mesmo garfo',       ticket:'R$ 120–300',     desc:'Você não abre mão de comer bem — mas precisa saber de onde vem.',               detail:'Orgânico, local, sustentável — não são modismos, são critérios.',                                                           recs:'Zero Waste Feast,Mesa do Fornecedor,Picnic Gourmet,Açaí Pós-Treino',        color:'#3daa6d'},
+  bonvivant:  {name:'O Bon Vivant',  emoji:'💎',tagline:'Prazer refinado. Execução perfeita.',     ticket:'R$ 400–1.800+',  desc:'Você construiu um estilo de vida em torno do prazer refinado.',                 detail:'Vinho de guarda, prato tecnicamente perfeito, serviço sem ruído.',                                                          recs:'Jantar Privativo às Cegas,Couple Signature,Experiência Michelin,Degustação', color:'#D4A053'},
+  conectorsocial:{name:'O Conector Social',emoji:'🎉',tagline:'Você decide onde todo mundo vai',   ticket:'R$ 100–300',     desc:'O restaurante começa antes de você entrar.',                                     detail:'Você não vai jantar — você cria experiências que as pessoas vão lembrar.',                                                  recs:'Picnic Gourmet,Brunch de Domingo,Rooftop Mixology,Jazz & MPB',               color:'#6d3daa'},
+};
+
+// ── Experiências locais (fallback) ──
+const EXP_LOCAL=[
+  {id:1,name:'Padaria Artesanal',cat:'MANHÃ SIMPLES',round:1,price:'R$ 25–45',dur:'30 min',status:'published'},
+  {id:2,name:'Brunch de Domingo',cat:'FIM DE SEMANA',round:1,price:'R$ 80–150',dur:'1h30–2h',status:'published'},
+  {id:3,name:'Almoço Fit & Funcional',cat:'LIFESTYLE',round:1,price:'R$ 55–95',dur:'1h',status:'published'},
+  {id:4,name:'Pós-Praia Descontraído',cat:'PÓS-PRAIA',round:1,price:'R$ 50–100',dur:'1h30–2h',status:'published'},
+  {id:5,name:'Late Breakfast com Wi-Fi',cat:'TRABALHO REMOTO',round:1,price:'R$ 35–65',dur:'2–3h',status:'published'},
+  {id:6,name:'Happy Hour Pós-Trabalho',cat:'PÓS-TRABALHO',round:1,price:'R$ 55–110',dur:'1–2h',status:'published'},
+  {id:7,name:'Menu Degustação 7 Tempos',cat:'ALTA GASTRONOMIA',round:2,price:'R$ 280–480',dur:'2–3h',status:'published'},
+  {id:8,name:'Sushi Omakase',cat:'CONFIANÇA TOTAL',round:2,price:'R$ 200–500',dur:'1h30–2h',status:'published'},
+  {id:9,name:'Mesa do Fornecedor',cat:'FARM-TO-TABLE',round:2,price:'R$ 200–350',dur:'2h30–3h',status:'published'},
+  {id:10,name:'Boteco Histórico',cat:'COM AMIGOS',round:2,price:'R$ 60–110',dur:'1h30–2h',status:'published'},
+  {id:11,name:'Zero Waste Feast',cat:'SUSTENTÁVEL',round:2,price:'R$ 150–220',dur:'2h',status:'published'},
+  {id:12,name:'Churrasco de Cortes Nobres',cat:'CLÁSSICO BRASILEIRO',round:2,price:'R$ 120–200',dur:'2–3h',status:'published'},
+  {id:13,name:"Chef's Table — Na Cozinha",cat:'VIP EXCLUSIVO',round:3,price:'R$ 500–750',dur:'2h30–3h',status:'published'},
+  {id:14,name:'Experiência Michelin',cat:'ULTRA PREMIUM',round:3,price:'R$ 500–900',dur:'3–4h',status:'published'},
+  {id:15,name:'Couple Signature — 5 Tempos',cat:'A DOIS',round:3,price:'R$ 380–550',dur:'2h30–3h',status:'published'},
+  {id:16,name:'Rooftop Mixology',cat:'COM VISTA',round:3,price:'R$ 80–160',dur:'2–3h',status:'published'},
+  {id:17,name:'Jazz & MPB Ao Vivo',cat:'CULTURA',round:3,price:'R$ 70–130',dur:'2–3h',status:'published'},
+  {id:18,name:'Edição Limitada — 10 Pessoas',cat:'RARIDADE',round:4,price:'R$ 350–600',dur:'2h30–3h',status:'published'},
+  {id:19,name:'Almoço Executivo — 45 min',cat:'EFICIÊNCIA',round:4,price:'R$ 80–150',dur:'45 min',status:'published'},
+  {id:20,name:'Açaí & Proteína Pós-Treino',cat:'PERFORMANCE',round:4,price:'R$ 35–65',dur:'30–45 min',status:'published'},
+  {id:21,name:'Picnic Gourmet no Parque',cat:'SOCIAL & DIURNO',round:4,price:'R$ 80–180',dur:'2–3h',status:'published'},
+  {id:22,name:'Jantar Privativo às Cegas',cat:'INTIMIDADE TOTAL',round:4,price:'R$ 400–700',dur:'2h30–3h',status:'published'},
+];
+
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let allUsers=[], allExp=EXP_LOCAL, allRest=[], editingExpId=null, editingRestId=null, editingArchKey=null;
+
+// ══════════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════════
+function doLogin(){
+  const pw=document.getElementById('login-pw').value;
+  if(pw===ADMIN_PW){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('sidebar').style.display='flex';
+    document.getElementById('main').style.display='flex';
+    loadAll();
+  } else {
+    const err=document.getElementById('login-err');
+    err.textContent='Senha incorreta';
+    setTimeout(()=>err.textContent='',2000);
+  }
+}
+document.getElementById('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ══════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════
+function nav(sec){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+sec).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════════════
+async function sbGet(table,params=''){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${table}?${params}`,{headers:SB_H});
+    return await r.json();
+  }catch(e){return [];}
+}
+async function sbPost(table,body){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=representation'},
+      body:JSON.stringify(body)
+    });
+    return await r.json();
+  }catch(e){return null;}
+}
+async function sbPatch(table,filter,body){
+  try{
+    await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{
+      method:'PATCH',headers:SB_H,body:JSON.stringify(body)
+    });
+  }catch(e){}
+}
+async function sbDelete(table,filter){
+  try{
+    await fetch(`${SB_URL}/rest/v1/${table}?${filter}`,{method:'DELETE',headers:SB_H});
+  }catch(e){}
+}
+
+// ══════════════════════════════════════════════════════════
+// LOAD ALL
+// ══════════════════════════════════════════════════════════
+async function loadAll(){
+  await Promise.all([loadUsers(), loadRestaurantes()]);
+  renderAnalytics();
+}
+
+// ══════════════════════════════════════════════════════════
+// USERS
+// ══════════════════════════════════════════════════════════
+async function loadUsers(){
+  // Busca users com onboarding de gastronomia (left join via select aninhado)
+  const data=await sbGet('users','select=*,user_onboardings!left(primary_archetype,secondary_archetype,liked_ids,completed_at,tier,onboarding_completed)&user_onboardings.category=eq.gastronomia&order=created_at.desc');
+  allUsers=Array.isArray(data)?data.map(u=>({
+    ...u,
+    primary_archetype:   u.user_onboardings?.[0]?.primary_archetype||null,
+    secondary_archetype: u.user_onboardings?.[0]?.secondary_archetype||null,
+    liked_ids:           u.user_onboardings?.[0]?.liked_ids||[],
+    completed_at:        u.user_onboardings?.[0]?.completed_at||null,
+    tier:                u.user_onboardings?.[0]?.tier||null,
+    onboarding_completed:u.user_onboardings?.[0]?.onboarding_completed||false,
+  })):[];
+  document.getElementById('badge-usuarios').textContent=allUsers.length;
+  renderUsers(allUsers);
+}
+
+function renderUsers(users){
+  const tb=document.getElementById('users-tbody');
+  if(!users.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-ico">👤</div><div class="empty-txt">Nenhum usuário ainda</div></div></td></tr>`;return;}
+  const ARCH_NAMES={habitue:'Habitué',jetset:'Jet-Set',foodie:'Foodie',atletaurbano:'Atleta Urbano',bohemio:'Boêmio',executivo:'Executivo',consciente:'Consciente',bonvivant:'Bon Vivant',conectorsocial:'Conector Social'};
+  const ARCH_EMOJI={habitue:'🏡',jetset:'✨',foodie:'🔥',atletaurbano:'💪',bohemio:'🍺',executivo:'⚡',consciente:'🌿',bonvivant:'💎',conectorsocial:'🎉'};
+  tb.innerHTML=users.map(u=>{
+    const arch=u.primary_archetype;
+    const arch2=u.secondary_archetype;
+    const liked=(u.liked_ids||[]).length;
+    const complete=!!u.completed_at;
+    const hasWP=!!u.whatsapp;
+    const date=u.created_at?new Date(u.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+    return `<tr>
+      <td><strong style="color:var(--creme)">${u.name||'<span style="color:var(--pedra)">Anônimo</span>'}</strong><br><span style="font-size:11px;color:var(--pedra)">#${u.member_number||'—'}</span></td>
+      <td>${arch?`<span class="user-arch-pill">${ARCH_EMOJI[arch]||''} ${ARCH_NAMES[arch]||arch}</span>`:'<span style="color:var(--pedra)">—</span>'}</td>
+      <td>${arch2?`<span style="font-size:11px;color:var(--pedra)">${ARCH_EMOJI[arch2]||''} ${ARCH_NAMES[arch2]||arch2}</span>`:'<span style="color:var(--pedra)">—</span>'}</td>
+      <td>${u.neighborhood_home||'<span style="color:var(--pedra)">—</span>'}</td>
+      <td>${hasWP?`<span class="pill pill-green">✓ capturado</span>`:`<span class="pill pill-gray">pendente</span>`}</td>
+      <td><span class="user-liked">♥ ${liked}</span></td>
+      <td>${complete?`<span class="pill pill-green">Completo</span>`:`<span class="pill pill-amber">Parcial</span>`}</td>
+      <td style="color:var(--pedra);font-size:12px">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(){
+  const q=document.getElementById('search-users').value.toLowerCase();
+  renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.neighborhood_home||'').toLowerCase().includes(q)));
+}
+
+function exportCSV(){
+  if(!allUsers.length){toast('Sem dados para exportar');return;}
+  const cols=['name','member_number','primary_archetype','secondary_archetype','tier','whatsapp','neighborhood_home','neighborhood_work','liked_ids','created_at','completed_at'];
+  const rows=[cols.join(','),...allUsers.map(u=>cols.map(c=>{const v=u[c];return Array.isArray(v)?`"${v.join(';')}"`:v!=null?`"${String(v).replace(/"/g,'""')}"`:''}).join(','))];
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fredinho-usuarios-${Date.now()}.csv`;a.click();
+  toast('CSV exportado ✓');
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPERIÊNCIAS
+// ══════════════════════════════════════════════════════════
+function renderExp(list){
+  const tb=document.getElementById('exp-tbody');
+  document.getElementById('badge-exp').textContent=list.length;
+  if(!list.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-ico">🃏</div><div class="empty-txt">Nenhuma experiência cadastrada</div></div></td></tr>`;return;}
+  const STATUS={published:'pill-green',draft:'pill-amber',archived:'pill-gray'};
+  const STATUS_LBL={published:'Publicado',draft:'Rascunho',archived:'Arquivado'};
+  tb.innerHTML=list.map(e=>`<tr>
+    <td><strong style="color:var(--creme)">${e.name}</strong></td>
+    <td><span style="font-size:11px;color:var(--pedra)">${e.cat||e.category||'—'}</span></td>
+    <td><span class="pill pill-purple">R${e.round||e.r||'?'}</span></td>
+    <td style="font-size:12px;color:var(--ambar)">${e.price||'—'}</td>
+    <td style="font-size:12px;color:var(--pedra)">${e.dur||e.duration||'—'}</td>
+    <td><span class="pill ${STATUS[e.status]||'pill-gray'}">${STATUS_LBL[e.status]||e.status||'—'}</span></td>
+    <td><div class="td-actions">
+      <button class="btn btn-ghost btn-sm btn-icon" title="Editar" onclick="openExpModal(${e.id})">✏️</button>
+      <button class="btn btn-danger btn-sm btn-icon" title="Arquivar" onclick="archiveExp(${e.id})">🗑</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+function filterExp(){
+  const q=document.getElementById('search-exp').value.toLowerCase();
+  renderExp(allExp.filter(e=>e.name.toLowerCase().includes(q)||(e.cat||'').toLowerCase().includes(q)));
+}
+
+function buildWeightsGrid(sig,sigNeg,sigPass){
+  const archKeys=Object.keys(ARCH_LOCAL);
+  const LABELS={habitue:'Habitué',jetset:'Jet-Set',foodie:'Foodie',atletaurbano:'Atleta Urb.',bohemio:'Boêmio',executivo:'Executivo',consciente:'Consciente',bonvivant:'Bon Vivant',conectorsocial:'Conector'};
+  return archKeys.map(k=>`
+    <div class="arch-weight-item">
+      <div class="arch-weight-name">${ARCH_LOCAL[k].emoji} ${LABELS[k]}</div>
+      <div class="arch-weight-inputs">
+        <div>
+          <input type="number" id="w-sig-${k}" value="${(sig&&sig[k])||0}" min="-10" max="10" step="1">
+          <div class="arch-weight-sub">sig</div>
+        </div>
+        <div>
+          <input type="number" id="w-neg-${k}" value="${(sigNeg&&sigNeg[k])||0}" min="-10" max="10" step="1">
+          <div class="arch-weight-sub">neg</div>
+        </div>
+        <div>
+          <input type="number" id="w-pass-${k}" value="${(sigPass&&sigPass[k])||0}" min="-10" max="10" step="1">
+          <div class="arch-weight-sub">pass</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openExpModal(id=null){
+  editingExpId=id;
+  const exp=id?allExp.find(e=>e.id===id):null;
+  document.getElementById('modal-exp-title').textContent=id?'Editar Experiência':'Nova Experiência';
+  document.getElementById('exp-name').value=exp?.name||'';
+  document.getElementById('exp-cat').value=exp?.cat||exp?.category||'';
+  document.getElementById('exp-price').value=exp?.price||'';
+  document.getElementById('exp-dur').value=exp?.dur||exp?.duration||'';
+  document.getElementById('exp-round').value=exp?.round||exp?.r||1;
+  document.getElementById('exp-status').value=exp?.status||'published';
+  document.getElementById('exp-desc').value=exp?.desc||exp?.description||'';
+  document.getElementById('exp-img').value=exp?.img||exp?.photo_url||'';
+  document.getElementById('arch-weights-grid').innerHTML=buildWeightsGrid(exp?.sig,exp?.sig_neg,exp?.sig_pass);
+  openModal('modal-exp');
+}
+
+function collectWeights(){
+  const sig={},neg={},pass={};
+  Object.keys(ARCH_LOCAL).forEach(k=>{
+    const s=parseInt(document.getElementById(`w-sig-${k}`)?.value)||0;
+    const n=parseInt(document.getElementById(`w-neg-${k}`)?.value)||0;
+    const p=parseInt(document.getElementById(`w-pass-${k}`)?.value)||0;
+    if(s) sig[k]=s; if(n) neg[k]=n; if(p) pass[k]=p;
+  });
+  return{sig,neg,pass};
+}
+
+async function saveExp(){
+  const name=document.getElementById('exp-name').value.trim();
+  if(!name){toast('Nome é obrigatório');return;}
+  const{sig,neg,pass}=collectWeights();
+  const body={
+    name,
+    category:document.getElementById('exp-cat').value.trim(),
+    price:document.getElementById('exp-price').value.trim(),
+    duration:document.getElementById('exp-dur').value.trim(),
+    round:parseInt(document.getElementById('exp-round').value),
+    status:document.getElementById('exp-status').value,
+    description:document.getElementById('exp-desc').value.trim(),
+    photo_url:document.getElementById('exp-img').value.trim(),
+    sig,sig_neg:neg,sig_pass:pass,
+  };
+  if(editingExpId){
+    await sbPatch('experiences',`id=eq.${editingExpId}`,body);
+    const idx=allExp.findIndex(e=>e.id===editingExpId);
+    if(idx>=0) allExp[idx]={...allExp[idx],...body,cat:body.category,dur:body.duration};
+    toast('Experiência atualizada ✓');
+  } else {
+    const res=await sbPost('experiences',body);
+    if(res&&res[0]){allExp.push({...res[0],cat:res[0].category,dur:res[0].duration});}
+    else{allExp.push({id:Date.now(),...body,cat:body.category,dur:body.duration});}
+    toast('Experiência criada ✓');
+  }
+  renderExp(allExp);
+  closeModal('modal-exp');
+}
+
+async function archiveExp(id){
+  if(!confirm('Arquivar esta experiência?'))return;
+  await sbPatch('experiences',`id=eq.${id}`,{status:'archived'});
+  const e=allExp.find(x=>x.id===id);if(e)e.status='archived';
+  renderExp(allExp);toast('Arquivada');
+}
+
+// ══════════════════════════════════════════════════════════
+// ARQUÉTIPOS
+// ══════════════════════════════════════════════════════════
+function renderArchGrid(){
+  const grid=document.getElementById('arch-grid');
+  grid.innerHTML=Object.entries(ARCH_LOCAL).map(([k,a])=>`
+    <div class="arch-card fade-in" onclick="openArchModal('${k}')">
+      <div class="arch-card-emoji">${a.emoji}</div>
+      <div class="arch-card-name">${a.name}</div>
+      <div class="arch-card-tag">${a.tagline}</div>
+      <div class="arch-card-ticket">${a.ticket}</div>
+    </div>`).join('');
+}
+
+function openArchModal(key){
+  editingArchKey=key;
+  const a=ARCH_LOCAL[key];
+  document.getElementById('modal-arch-title').textContent=`Editar — ${a.name}`;
+  document.getElementById('modal-arch-sub').textContent=`Arquétipo: ${key}`;
+  document.getElementById('arch-name-i').value=a.name;
+  document.getElementById('arch-emoji-i').value=a.emoji;
+  document.getElementById('arch-tagline-i').value=a.tagline;
+  document.getElementById('arch-ticket-i').value=a.ticket;
+  document.getElementById('arch-desc-i').value=a.desc;
+  document.getElementById('arch-detail-i').value=a.detail;
+  document.getElementById('arch-recs-i').value=a.recs;
+  openModal('modal-arch');
+}
+
+async function saveArch(){
+  if(!editingArchKey)return;
+  const updates={
+    name:document.getElementById('arch-name-i').value.trim(),
+    emoji:document.getElementById('arch-emoji-i').value.trim(),
+    tagline:document.getElementById('arch-tagline-i').value.trim(),
+    ticket:document.getElementById('arch-ticket-i').value.trim(),
+    desc:document.getElementById('arch-desc-i').value.trim(),
+    detail:document.getElementById('arch-detail-i').value.trim(),
+    recs:document.getElementById('arch-recs-i').value.trim(),
+  };
+  Object.assign(ARCH_LOCAL[editingArchKey],updates);
+  await sbPatch('archetypes',`key=eq.${editingArchKey}`,updates);
+  renderArchGrid();
+  closeModal('modal-arch');
+  toast('Arquétipo atualizado ✓');
+}
+
+// ══════════════════════════════════════════════════════════
+// RESTAURANTES
+// ══════════════════════════════════════════════════════════
+async function loadRestaurantes(){
+  const data=await sbGet('restaurants','select=*&order=created_at.desc');
+  allRest=Array.isArray(data)?data:[];
+  document.getElementById('badge-rest').textContent=allRest.length;
+  renderRest();
+}
+
+function renderRest(){
+  const tb=document.getElementById('rest-tbody');
+  if(!allRest.length){tb.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-ico">🍽️</div><div class="empty-txt">Nenhum restaurante cadastrado</div></div></td></tr>`;return;}
+  tb.innerHTML=allRest.map(r=>{
+    const deck=r.deck_ids?r.deck_ids.length:0;
+    const users=allUsers.filter(u=>u.source_restaurant_id===r.id).length;
+    return `<tr>
+      <td><strong style="color:var(--creme)">${r.name}</strong><br><span style="font-size:11px;color:var(--pedra)">${r.neighborhood||''}</span></td>
+      <td><code style="font-size:11px;color:var(--ambar);background:rgba(212,160,83,.08);padding:2px 7px;border-radius:5px">${r.slug}</code></td>
+      <td style="font-size:12px;color:var(--pedra)">${r.neighborhood||'—'}</td>
+      <td><span class="pill ${deck?'pill-purple':'pill-gray'}">${deck?deck+' cards':'Padrão'}</span></td>
+      <td style="font-size:13px;color:var(--creme2)">${users}</td>
+      <td><span class="pill ${r.status==='active'?'pill-green':'pill-gray'}">${r.status==='active'?'Ativo':'Inativo'}</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyLink('${r.slug}')">🔗</button>
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="openRestModal(${r.id})">✏️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openRestModal(id=null){
+  editingRestId=id;
+  const rest=id?allRest.find(r=>r.id===id):null;
+  document.getElementById('modal-rest-title').textContent=id?'Editar Restaurante':'Novo Restaurante';
+  document.getElementById('rest-name').value=rest?.name||'';
+  document.getElementById('rest-slug').value=rest?.slug||'';
+  document.getElementById('rest-bairro').value=rest?.neighborhood||'';
+  document.getElementById('rest-status').value=rest?.status||'active';
+  const selectedDeck=rest?.deck_ids||[];
+  const wrap=document.getElementById('deck-selector');
+  wrap.innerHTML=allExp.map(e=>`
+    <div class="deck-chip ${selectedDeck.includes(e.id)?'sel':''}" data-id="${e.id}" onclick="toggleDeckChip(this)">
+      <span>R${e.round||e.r}</span> ${e.name}
+    </div>`).join('');
+  openModal('modal-rest');
+}
+
+function toggleDeckChip(el){el.classList.toggle('sel');}
+
+async function saveRest(){
+  const name=document.getElementById('rest-name').value.trim();
+  const slug=document.getElementById('rest-slug').value.trim().toLowerCase().replace(/\s+/g,'-');
+  if(!name||!slug){toast('Nome e slug são obrigatórios');return;}
+  const deck_ids=[...document.querySelectorAll('.deck-chip.sel')].map(c=>parseInt(c.dataset.id));
+  const body={name,slug,neighborhood:document.getElementById('rest-bairro').value.trim(),status:document.getElementById('rest-status').value,deck_ids:deck_ids.length?deck_ids:null};
+  if(editingRestId){
+    await sbPatch('restaurants',`id=eq.${editingRestId}`,body);
+    const idx=allRest.findIndex(r=>r.id===editingRestId);if(idx>=0) allRest[idx]={...allRest[idx],...body};
+    toast('Restaurante atualizado ✓');
+  } else {
+    const res=await sbPost('restaurants',body);
+    if(res&&res[0]) allRest.push(res[0]); else allRest.push({id:Date.now(),...body});
+    toast('Restaurante criado ✓');
+  }
+  renderRest();closeModal('modal-rest');
+}
+
+function copyLink(slug){
+  const url=`${window.location.origin}/fredinho-v7.html?r=${slug}`;
+  navigator.clipboard?.writeText(url);
+  toast('Link copiado! 🔗');
+}
+
+// ══════════════════════════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════════════════════════
+function renderAnalytics(){
+  const total=allUsers.length;
+  const complete=allUsers.filter(u=>u.completed_at).length;
+  const wps=allUsers.filter(u=>u.whatsapp).length;
+  const rate=total?Math.round(complete/total*100):0;
+  document.getElementById('st-total').textContent=total||'0';
+  document.getElementById('st-complete').textContent=complete||'0';
+  document.getElementById('st-rate').textContent=`${rate}% taxa`;
+  document.getElementById('st-wp').textContent=wps||'0';
+
+  // Arquétipo top
+  const archCount={};
+  allUsers.forEach(u=>{if(u.primary_archetype)archCount[u.primary_archetype]=(archCount[u.primary_archetype]||0)+1;});
+  const sorted=Object.entries(archCount).sort((a,b)=>b[1]-a[1]);
+  if(sorted.length){
+    const[topKey,topN]=sorted[0];
+    document.getElementById('st-arch').textContent=ARCH_LOCAL[topKey]?.emoji||'—';
+    document.getElementById('st-arch-sub').textContent=`${ARCH_LOCAL[topKey]?.name||topKey} · ${topN} pessoas`;
+  }
+
+  // Chart arquétipos
+  const maxA=sorted[0]?.[1]||1;
+  const COLORS={habitue:'#B85C38',jetset:'#D4A053',foodie:'#c96b44',atletaurbano:'#3daa6d',bohemio:'#8C7B6B',executivo:'#8888cc',consciente:'#4db880',bonvivant:'#D4A053',conectorsocial:'#6d3daa'};
+  document.getElementById('arch-chart').innerHTML=sorted.slice(0,6).map(([k,n])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${ARCH_LOCAL[k]?.emoji||''} ${ARCH_LOCAL[k]?.name||k}</span><span>${n} (${Math.round(n/total*100)||0}%)</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxA*100)}%;background:${COLORS[k]||'#B85C38'}"></div></div>
+    </div>`).join('')||'<div style="color:var(--pedra);font-size:13px">Sem dados ainda</div>';
+
+  // Cards mais curtidos
+  const cardCount={};
+  allUsers.forEach(u=>(u.liked_ids||[]).forEach(id=>{cardCount[id]=(cardCount[id]||0)+1;}));
+  const sortedCards=Object.entries(cardCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxC=sortedCards[0]?.[1]||1;
+  document.getElementById('cards-chart').innerHTML=sortedCards.map(([id,n])=>{
+    const exp=allExp.find(e=>e.id==id);
+    return `<div class="bar-item">
+      <div class="bar-label"><span>${exp?.name||'Card #'+id}</span><span>${n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxC*100)}%;background:var(--terra)"></div></div>
+    </div>`;
+  }).join('')||'<div style="color:var(--pedra);font-size:13px">Sem dados ainda</div>';
+
+  // Família
+  const famCount={};
+  allUsers.forEach(u=>(u.familia||[]).forEach(f=>{famCount[f]=(famCount[f]||0)+1;}));
+  const FAM_LBL={casal:'Casal',amigos:'Amigos',bebe:'Bebê',criancas:'Crianças',teens:'Adolescentes',negocios:'Negócios',solo:'Solo',pet:'Com pet'};
+  const sortedFam=Object.entries(famCount).sort((a,b)=>b[1]-a[1]);
+  const maxF=sortedFam[0]?.[1]||1;
+  document.getElementById('familia-chart').innerHTML=sortedFam.map(([k,n])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${FAM_LBL[k]||k}</span><span>${n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxF*100)}%;background:var(--ambar)"></div></div>
+    </div>`).join('')||'<div style="color:var(--pedra);font-size:13px">Sem dados ainda</div>';
+
+  // Saúde
+  const saudeCount={};
+  allUsers.forEach(u=>(u.saude||[]).forEach(s=>{saudeCount[s]=(saudeCount[s]||0)+1;}));
+  const SAUDE_LBL={nenhuma:'Nenhuma',plantbased:'Plant-based',semgluten:'Sem glúten',lowcarb:'Low Carb',cetogenica:'Cetogênica',organicos:'Orgânicos',alergia:'Alergia grave'};
+  const sortedS=Object.entries(saudeCount).sort((a,b)=>b[1]-a[1]);
+  const maxS=sortedS[0]?.[1]||1;
+  document.getElementById('saude-chart').innerHTML=sortedS.map(([k,n])=>`
+    <div class="bar-item">
+      <div class="bar-label"><span>${SAUDE_LBL[k]||k}</span><span>${n}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxS*100)}%;background:var(--verde)"></div></div>
+    </div>`).join('')||'<div style="color:var(--pedra);font-size:13px">Sem dados ainda</div>';
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+// Init: render local data immediately, then fetch from Supabase
+renderExp(allExp);
+renderArchGrid();
+</script>
+</body>
+</html>
