@@ -1228,35 +1228,19 @@ async function saveInitial(){
   const savedMember = localStorage.getItem('fredinho_member_number');
 
   if(savedId){
-    // Verifica se o perfil ainda existe no banco antes de assumir que pode atualizar
+    // Verifica se o perfil ainda existe no banco
     try{
       const checkRes = await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${savedId}&select=user_id`,{headers:SB_H});
       const checkData = await checkRes.json();
 
       if(checkData && checkData.length > 0){
-        // Perfil existe — atualiza nome e reseta dados de onboarding para nova jornada
+        // Perfil existe — só atualiza o nome em users
+        // Onboarding e preferências são resetados em saveProgress
         user.user_id = savedId;
         user.member_number = savedMember || user.member_number;
         await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
           method:'PATCH', headers:SB_H,
-          body:JSON.stringify({
-            name: user.name,
-            cards_completed: 0,
-            liked_ids: [],
-            onboarding_completed: false,
-            primary_archetype: null,
-            secondary_archetype: null,
-            archetype_scores: null,
-            tier: null,
-            tier_score: 0,
-            alimentacao: null,
-            contextos: null,
-            filhos: null,
-            dieta: null,
-            vegano: false,
-            alergia_grave: false,
-            alergias: null,
-          })
+          body:JSON.stringify({ name: user.name, updated_at: new Date().toISOString() })
         });
         return;
       } else {
@@ -1278,21 +1262,22 @@ async function saveInitial(){
       method:'POST',
       headers:{...SB_H,'Prefer':'return=representation'},
       body:JSON.stringify({
-        name:user.name,
-        member_number:user.member_number,
-        source_restaurant:restaurantUUID,
-        source_url:window.location.href,
-        created_at:new Date().toISOString()
+        name:                user.name,
+        member_number:       user.member_number,
+        source_restaurant_id: restaurantUUID,
+        source_url:          window.location.href,
+        created_at:          new Date().toISOString()
       })
     });
     const d=await res.json();
     if(d[0]){
       user.user_id=d[0].user_id;
-      // Persiste para não duplicar em sessões futuras
       localStorage.setItem('fredinho_user_id', user.user_id);
       localStorage.setItem('fredinho_member_number', user.member_number);
+    } else {
+      console.warn('[Fredinho] Erro ao criar perfil:', d);
     }
-  }catch(e){console.warn(e);}
+  }catch(e){console.warn('[Fredinho] saveInitial error:',e);}
 }
 
 async function saveProgress(final=false){
