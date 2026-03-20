@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#EFEFED">
+<title>Reserva — Fredinho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EFEFED;--bg2:#E7E7E5;
+  --terra:#8B3A1E;--terra2:#a04422;
+  --creme:#1C1410;--creme2:#3a2e26;
+  --ambar:#9A6B2E;
+  --pedra:#6B5E52;--pedra2:#8a7a6e;
+  --tr:cubic-bezier(.23,1,.32,1);
+  --green:#15803D;--greenBg:#F0FDF4;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:420px;margin:0 auto;padding:48px 28px 64px}
+.wordmark{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--pedra);opacity:.5;margin-bottom:40px}
+.exp-nome{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7vw,38px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme);margin-bottom:8px}
+.exp-detalhe{font-size:13px;color:var(--pedra);margin-bottom:32px;line-height:1.6}
+.secao{margin-bottom:28px}
+.secao-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:12px}
+.dias-grid{display:flex;gap:8px;flex-wrap:wrap}
+.dia-btn{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:10px 16px;cursor:pointer;font-size:14px;color:var(--creme2);font-weight:400;font-family:'DM Sans',sans-serif;transition:border-color .15s,background .15s}
+.dia-btn.sel{border-color:var(--terra);background:rgba(139,58,30,.08);color:var(--creme);font-weight:500}
+.lugares-wrap{display:flex;align-items:center;gap:16px}
+.lugares-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(28,20,16,.15);background:var(--bg);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;color:var(--creme);transition:border-color .15s}
+.lugares-btn:hover{border-color:var(--terra)}
+.lugares-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--creme);min-width:48px;text-align:center;line-height:1}
+.lugares-label{font-size:12px;color:var(--pedra)}
+.resumo{background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px;margin-bottom:28px;display:none}
+.resumo.show{display:block}
+.resumo-linha{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.resumo-linha:last-child{margin-bottom:0;font-weight:600;padding-top:8px;border-top:1px solid rgba(28,20,16,.08)}
+.btn-reservar{background:var(--terra);color:#EFEFED;border:none;border-radius:4px;padding:17px 0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:all .28s var(--tr);letter-spacing:.3px;margin-bottom:12px}
+.btn-reservar:hover{background:var(--terra2);transform:translateY(-1px)}
+.btn-reservar:active{transform:scale(.97)}
+.btn-reservar:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.sucesso{display:none;text-align:center;padding:48px 0}
+.sucesso.show{display:block}
+.sucesso-icon{font-size:52px;margin-bottom:16px}
+.sucesso-titulo{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;font-style:italic;color:var(--creme);margin-bottom:8px}
+.sucesso-sub{font-size:14px;color:var(--pedra);line-height:1.6}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-14px);background:var(--creme);border-radius:4px;padding:10px 22px;font-size:13px;color:#EFEFED;opacity:0;pointer-events:none;white-space:nowrap;transition:all .38s var(--tr);z-index:999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">Fredinho · Weissmann</div>
+
+  <!-- Formulário de reserva -->
+  <div id="form-reserva">
+    <div class="exp-nome" id="exp-nome">—</div>
+    <div class="exp-detalhe" id="exp-detalhe">—</div>
+
+    <!-- Escolha o dia -->
+    <div class="secao">
+      <div class="secao-label">Qual dia?</div>
+      <div class="dias-grid" id="dias-grid"></div>
+    </div>
+
+    <!-- Número de lugares -->
+    <div class="secao">
+      <div class="secao-label">Quantas pessoas?</div>
+      <div class="lugares-wrap">
+        <button class="lugares-btn" onclick="ajustarLugares(-1)">−</button>
+        <div>
+          <div class="lugares-num" id="lugares-num">1</div>
+          <div class="lugares-label" id="lugares-label">pessoa</div>
+        </div>
+        <button class="lugares-btn" onclick="ajustarLugares(1)">+</button>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="resumo" id="resumo">
+      <div class="resumo-linha">
+        <span style="color:var(--pedra)">Experiência</span>
+        <span id="res-nome">—</span>
+      </div>
+      <div class="resumo-linha">
+        <span style="color:var(--pedra)">Data</span>
+        <span id="res-dia">—</span>
+      </div>
+      <div class="resumo-linha">
+        <span style="color:var(--pedra)">Horário</span>
+        <span id="res-horario">—</span>
+      </div>
+      <div class="resumo-linha">
+        <span style="color:var(--pedra)">Pessoas</span>
+        <span id="res-lugares">—</span>
+      </div>
+      <div class="resumo-linha" id="res-preco-linha" style="display:none">
+        <span style="color:var(--pedra)">Total estimado</span>
+        <span id="res-preco">—</span>
+      </div>
+    </div>
+
+    <button class="btn-reservar" id="btn-reservar" onclick="reservar()" disabled>
+      Confirmar reserva →
+    </button>
+    <div style="font-size:11px;color:var(--pedra);text-align:center;line-height:1.6">
+      Sua reserva será confirmada pelo restaurante via Telegram.
+    </div>
+  </div>
+
+  <!-- Tela de sucesso -->
+  <div class="sucesso" id="sucesso">
+    <div class="sucesso-icon">✓</div>
+    <div class="sucesso-titulo">Reserva enviada.</div>
+    <div class="sucesso-sub" id="sucesso-sub">
+      O restaurante vai confirmar em breve pelo Telegram.
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SB_URL = 'https://jebhatmtzhoxoklfxzgh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q';
+const SB_H = {'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+
+const DIAS_NOMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS_FULL  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+// Lê parâmetros da URL
+const p = new URLSearchParams(window.location.search);
+const expId   = p.get('exp') || '';
+const expNome = decodeURIComponent(p.get('nome') || 'Experiência especial');
+const vagasMax= parseInt(p.get('vagas')) || 10;
+const preco   = parseFloat(p.get('preco')) || 0;
+const diasIds = (p.get('dias')||'').split(',').map(Number).filter(d=>!isNaN(d)&&d>=0&&d<=6);
+const horario = parseInt(p.get('horario')) || 19;
+
+let diaSel  = null;
+let lugares = 1;
+
+// Preenche cabeçalho
+document.getElementById('exp-nome').textContent = expNome;
+document.getElementById('exp-detalhe').textContent =
+  `${horario}h · ${vagasMax} vagas · ${preco>0?'R$'+preco+'/pessoa':'Grátis'}`;
+
+// Monta grid de dias — próximas 4 semanas com os dias permitidos
+const grid = document.getElementById('dias-grid');
+const hoje = new Date();
+const datas = [];
+for(let i=1; i<=28; i++){
+  const d = new Date(hoje);
+  d.setDate(hoje.getDate()+i);
+  if(diasIds.length===0 || diasIds.includes(d.getDay())){
+    datas.push(d);
+    if(datas.length>=6) break;
+  }
+}
+
+datas.forEach(d=>{
+  const btn = document.createElement('button');
+  btn.className = 'dia-btn';
+  const dia = d.getDate().toString().padStart(2,'0');
+  const mes = (d.getMonth()+1).toString().padStart(2,'0');
+  btn.innerHTML = `<span style="font-weight:600">${DIAS_NOMES[d.getDay()]}</span><br><span style="font-size:12px;color:var(--pedra)">${dia}/${mes}</span>`;
+  btn.style.minWidth = '70px';
+  btn.style.textAlign = 'center';
+  btn.style.lineHeight = '1.4';
+  btn.onclick = () => selecionarDia(d, btn);
+  grid.appendChild(btn);
+});
+
+function selecionarDia(d, btn){
+  document.querySelectorAll('.dia-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  diaSel = d;
+  atualizarResumo();
+}
+
+function ajustarLugares(delta){
+  lugares = Math.max(1, Math.min(vagasMax, lugares+delta));
+  document.getElementById('lugares-num').textContent = lugares;
+  document.getElementById('lugares-label').textContent = lugares===1?'pessoa':'pessoas';
+  atualizarResumo();
+}
+
+function atualizarResumo(){
+  const btn = document.getElementById('btn-reservar');
+  if(!diaSel){ btn.disabled=true; return; }
+  btn.disabled = false;
+
+  // Atualiza resumo
+  const dia = diaSel.getDate().toString().padStart(2,'0');
+  const mes = (diaSel.getMonth()+1).toString().padStart(2,'0');
+  document.getElementById('res-nome').textContent    = expNome;
+  document.getElementById('res-dia').textContent     = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes}`;
+  document.getElementById('res-horario').textContent = `${horario}h`;
+  document.getElementById('res-lugares').textContent = `${lugares} ${lugares===1?'pessoa':'pessoas'}`;
+
+  if(preco>0){
+    document.getElementById('res-preco-linha').style.display='flex';
+    document.getElementById('res-preco').textContent = `R$${(preco*lugares).toLocaleString('pt-BR')}`;
+  }
+
+  document.getElementById('resumo').classList.add('show');
+}
+
+async function reservar(){
+  if(!diaSel) return;
+  document.getElementById('btn-reservar').disabled = true;
+  document.getElementById('btn-reservar').textContent = 'Enviando…';
+
+  // user_id do localStorage do Fredinho
+  const userId = localStorage.getItem('fredinho_user_id');
+  const dia = diaSel.getDate().toString().padStart(2,'0');
+  const mes = (diaSel.getMonth()+1).toString().padStart(2,'0');
+  const dataStr = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes} às ${horario}h`;
+
+  try {
+    // Salva reserva na tabela convite_events como confirmação
+    if(userId && expId){
+      await fetch(`${SB_URL}/rest/v1/convite_events`, {
+        method:'POST', headers:{...SB_H,'Prefer':'return=minimal'},
+        body: JSON.stringify({
+          experiencia_id: expId,
+          user_id:        userId,
+          canal:          'telegram',
+          converteu:      true,
+          abriu:          true,
+        })
+      });
+    }
+
+    // Mostra tela de sucesso
+    document.getElementById('form-reserva').style.display='none';
+    const sucesso = document.getElementById('sucesso');
+    sucesso.classList.add('show');
+    document.getElementById('sucesso-sub').textContent =
+      `${expNome} · ${dataStr} · ${lugares} ${lugares===1?'pessoa':'pessoas'}. O restaurante confirma em breve pelo Telegram.`;
+
+  } catch(e){
+    document.getElementById('btn-reservar').disabled = false;
+    document.getElementById('btn-reservar').textContent = 'Confirmar reserva →';
+    toast('Erro ao enviar. Tente novamente.');
+  }
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
