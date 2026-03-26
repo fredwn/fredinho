@@ -282,16 +282,19 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
   </div>
 </div>
 
-<!-- MICRO-CTA: TELEGRAM (link abre direto via JS, sem depender do href no momento do clique) -->
+<!-- TELEGRAM -->
 <div id="s-telegram" class="screen">
   <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
   <div class="mcta-inner">
-    <div class="mcta-eyebrow">Primeiro aviso</div>
-    <h2 class="mcta-title">Quando surgir uma<br><em>mesa assim,</em><br>como te avisamos?</h2>
-    <p class="mcta-sub">As experiências que você curtiu têm vagas limitadas. Conecte o Telegram para ser avisado antes de todo mundo — sem spam, só o que é feito para você.</p>
+    <div class="mcta-eyebrow">Canal de avisos</div>
+    <h2 class="mcta-title">Quer ser avisado quando<br>surgir uma <em>mesa assim?</em></h2>
+    <p class="mcta-sub">Conecte o Telegram para receber seus convites antes de todo mundo. Só o que foi feito para você — sem spam.</p>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .3s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Conectar Telegram</strong>, você autoriza o Fredinho a enviar mensagens pelo bot <strong>@ListadoFredinho_bot</strong>. Você pode cancelar a qualquer momento digitando /sair no bot.</p>
+    </div>
     <div class="mcta-actions">
       <button class="btn-p" onclick="onTelegramClick()">Conectar Telegram →</button>
-      <div id="tg-status" style="display:none;font-size:12px;color:var(--pedra);text-align:center;padding:8px 0;line-height:1.6">Aguardando conexão… Após apertar <strong>Iniciar</strong> no bot, seu Telegram estará vinculado.</div>
+      <div id="tg-status" style="display:none;font-size:12px;color:var(--pedra);text-align:center;padding:10px 0;line-height:1.65">✓ Abrindo o bot… Após tocar em <strong>Iniciar</strong>, seu Telegram estará vinculado ao seu perfil.</div>
     </div>
     <p class="mcta-skip" onclick="skipTelegram()">Agora não</p>
   </div>
@@ -333,21 +336,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-actions">
       <button class="btn-p" id="btn-trabalha" onclick="saveBairroTrabalha()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Continuar →</button>
     </div>
-    <p class="mcta-skip" onclick="prepareWhatsApp();go('s-whatsapp')">Pular</p>
-  </div>
-</div>
-
-<!-- MICRO-CTA: WHATSAPP -->
-<div id="s-whatsapp" class="screen">
-  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
-  <div class="mcta-inner">
-    <div class="mcta-eyebrow">Canal direto</div>
-    <h2 class="mcta-title">Quer receber convites<br>pelo <em>WhatsApp?</em></h2>
-    <p class="mcta-sub">Mande uma mensagem para o Fredinho. Você inicia — a gente nunca dispara sem seu contato primeiro.</p>
-    <div class="mcta-actions">
-      <button class="btn-p" onclick="onWhatsAppClick()">Abrir WhatsApp →</button>
-    </div>
-    <p class="mcta-skip" onclick="openPushScreen()">Agora não</p>
+    <p class="mcta-skip" onclick="afterBairros()">Pular</p>
   </div>
 </div>
 
@@ -401,8 +390,25 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 
     <div style="opacity:0;animation:fsu .6s .45s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
       <button class="btn-p" id="push-btn" onclick="requestPushFromCTA()">Ativar notificações →</button>
-      <p class="mcta-skip" style="opacity:1" onclick="goToCelebration()">Agora não</p>
+      <p class="mcta-skip" style="opacity:1" onclick="prepareWhatsApp();go('s-whatsapp')">Agora não</p>
     </div>
+  </div>
+</div>
+
+<!-- WHATSAPP — último canal, opt-in explícito -->
+<div id="s-whatsapp" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Último passo</div>
+    <h2 class="mcta-title">Quer convites<br>pelo <em>WhatsApp?</em></h2>
+    <p class="mcta-sub">É o canal mais direto. Você envia uma mensagem agora autorizando o contato — a gente nunca manda nada sem essa confirmação.</p>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .3s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Abrir WhatsApp</strong>, você será direcionado para iniciar uma conversa com o Fredinho. A mensagem enviada constitui seu consentimento para receber comunicações personalizadas. Você pode cancelar a qualquer momento respondendo <strong>SAIR</strong>.</p>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" onclick="onWhatsAppClick()">Abrir WhatsApp →</button>
+    </div>
+    <p class="mcta-skip" onclick="goToCelebration()">Agora não</p>
   </div>
 </div>
 
@@ -766,8 +772,14 @@ function onTelegramClick(){
   updateTelegramLink();
   window.open(window._tgLink,'_blank');
   document.getElementById('tg-status').style.display='block';
+  const now=new Date().toISOString();
+  const consentText='Usuário clicou em Conectar Telegram e abriu @ListadoFredinho_bot com parâmetro start='+user.member_number;
   if(user.user_id&&!user.user_id.startsWith('local_')){
-    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({telegram_pending:true,telegram_start_param:user.member_number})}).catch(()=>{});
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({telegram_pending:true,telegram_start_param:user.member_number,telegram_consent_at:now})
+    }).catch(()=>{});
+    saveConsent('telegram',consentText,'clicked_connect_telegram');
   }
   setTimeout(()=>go('s-bairro-mora'),2000);
 }
@@ -795,7 +807,7 @@ function saveBairroTrabalha(){
   if(user.user_id&&!user.user_id.startsWith('local_')&&(user.neighborhood_home||user.neighborhood_work)){
     fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_home:user.neighborhood_home||null,neighborhood_work:user.neighborhood_work||null})}).catch(()=>{});
   }
-  prepareWhatsApp();go('s-whatsapp');
+  afterBairros();
 }
 
 // ═══════════════════════════════════════════════
@@ -810,11 +822,18 @@ function prepareWhatsApp(){
 function onWhatsAppClick(){
   if(!window._waLink)prepareWhatsApp();
   window.open(window._waLink,'_blank');
+  const now=new Date().toISOString();
+  const consentText='Usuário clicou em Abrir WhatsApp e foi direcionado para wa.me/5521967227832 com mensagem de opt-in explícita';
   if(user.user_id&&!user.user_id.startsWith('local_')){
-    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({whatsapp_opt_in:true,whatsapp_opt_in_at:new Date().toISOString()})}).catch(()=>{});
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({whatsapp_opt_in:true,whatsapp_opt_in_at:now,whatsapp_consent_text:consentText})
+    }).catch(()=>{});
+    saveConsent('whatsapp',consentText,'clicked_open_whatsapp');
   }
-  setTimeout(()=>openPushScreen(),1200);
+  setTimeout(()=>goToCelebration(),1200);
 }
+function afterBairros(){openPushScreen();}
 
 // ═══════════════════════════════════════════════
 // PUSH
@@ -832,8 +851,7 @@ function openPushScreen(){
 async function requestPushFromCTA(){
   if(isIOS&&!isInStandaloneMode){
     toast('Siga os passos acima para instalar e depois ativar 👆');
-    // Avança para celebração após 3s — usuário já viu as instruções
-    setTimeout(()=>goToCelebration(),3000);return;
+    setTimeout(()=>{prepareWhatsApp();go('s-whatsapp');},3000);return;
   }
   if(!('Notification' in window)||!('PushManager' in window)){goToCelebration();return;}
   try{
@@ -841,7 +859,7 @@ async function requestPushFromCTA(){
     if(permission==='granted'){await savePushToken();toast('Notificações ativas! ✓');}
     else{toast('Permissão não concedida');}
   }catch(e){console.warn('[Push]',e);}
-  setTimeout(()=>goToCelebration(),700);
+  setTimeout(()=>{prepareWhatsApp();go('s-whatsapp');},700);
 }
 async function savePushToken(){
   if(!swRegistration){try{swRegistration=await navigator.serviceWorker.ready;}catch(e){return;}}
@@ -886,7 +904,7 @@ async function saveInitial(){
   try{
     const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
     const rData=await rRes.json();
-    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,created_at:new Date().toISOString()})});
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,user_agent:navigator.userAgent,created_at:new Date().toISOString()})});
     const d=await res.json();
     if(d[0]){user.user_id=d[0].user_id;localStorage.setItem('fredinho_user_id',user.user_id);localStorage.setItem('fredinho_member_number',user.member_number);updateTelegramLink();}
   }catch(e){
@@ -988,6 +1006,28 @@ function shareWithRestaurant(){
 // ═══════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CONSENTIMENTOS — auditoria Meta / Telegram
+// ═══════════════════════════════════════════════
+async function saveConsent(channel,consentText,action){
+  if(!user.user_id||user.user_id.startsWith('local_'))return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/consents`,{
+      method:'POST',
+      headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        user_id:user.user_id,
+        channel,
+        action,
+        consent_text:consentText,
+        consent_timestamp:new Date().toISOString(),
+        user_agent:navigator.userAgent,
+        source_url:window.location.href,
+      })
+    });
+  }catch(e){console.warn('[Consent]',e);}
+}
+
 function launchConfetti(color){
   const cols=[color,'#D4A053','#F2E8DC','#B85C38'];
   for(let i=0;i<40;i++)setTimeout(()=>{
