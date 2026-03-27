@@ -83,6 +83,12 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 .mcta-skip{font-size:12px;color:rgba(107,94,82,.45);text-align:center;margin-top:16px;cursor:pointer;transition:color .2s}
 .mcta-skip:hover{color:var(--pedra)}
 
+/* ════ EMAIL INPUT ════ */
+.email-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(28,20,16,.15);padding:6px 0 16px;font-size:24px;font-weight:300;color:var(--creme);outline:none;font-family:'Cormorant Garamond',serif;font-style:italic;caret-color:var(--terra);-webkit-appearance:none;-webkit-tap-highlight-color:transparent}
+.email-input::placeholder{color:rgba(28,20,16,.18)}
+.email-underline{position:absolute;bottom:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--terra),var(--ambar));transform:scaleX(0);transform-origin:left;transition:transform .45s var(--tr)}
+.email-input:focus~.email-underline{transform:scaleX(1)}
+
 /* ════ CHIPS bairro ════ */
 .chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;opacity:0;animation:fsu .6s .25s var(--tr) forwards}
 .chip{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:13px 10px;cursor:pointer;transition:border-color .15s,background .15s;font-size:13px;color:var(--creme2);font-weight:400;user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;line-height:1.3}
@@ -408,6 +414,29 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-actions">
       <button class="btn-p" onclick="onWhatsAppClick()">Abrir WhatsApp →</button>
     </div>
+    <p class="mcta-skip" onclick="goToEmailOrCelebration()">Agora não</p>
+  </div>
+</div>
+
+<!-- EMAIL — canal de fallback e registro -->
+<div id="s-email" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Último canal</div>
+    <h2 class="mcta-title">Por onde te<br><em>encontramos?</em></h2>
+    <p class="mcta-sub">Quando surgir algo feito para você, enviamos por aqui. Poucos e-mails, sempre com algo que vale a atenção.</p>
+    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+      <input class="email-input" id="f-email" type="email" inputmode="email" placeholder="seu@email.com"
+        autocorrect="off" autocapitalize="none" spellcheck="false"
+        oninput="onEmailInput()" onkeydown="if(event.key==='Enter')saveEmail()">
+      <div class="email-underline" id="ul-email"></div>
+    </div>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .38s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Confirmar</strong>, você autoriza o Fredinho a enviar convites personalizados para este endereço. Você pode cancelar a qualquer momento respondendo ao e-mail com <strong>SAIR</strong>.</p>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="email-btn" onclick="saveEmail()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Confirmar →</button>
+    </div>
     <p class="mcta-skip" onclick="goToCelebration()">Agora não</p>
   </div>
 </div>
@@ -486,6 +515,8 @@ let user={
   contextos:[],filhos:[],alergias:[],alergia_grave:false,
   familia:[],saude:['nenhuma'],tier:'',
   source_restaurant:'',utm_source:'',member_number:'',user_id:null,
+  email:'',email_confirmed:false,
+  telegram_connected:false,whatsapp_sent:false,
 };
 let liked=[],disliked=[],axisScores={foodie:0,classico:0,sustentavel:0,social:0,exclusivo:0,bohemio:0};
 let tierScore=0,consecutiveLikes=0;
@@ -781,6 +812,7 @@ function onTelegramClick(){
     }).catch(()=>{});
     saveConsent('telegram',consentText,'clicked_connect_telegram');
   }
+  user.telegram_connected=true;
   setTimeout(()=>go('s-bairro-mora'),2000);
 }
 function skipTelegram(){go('s-bairro-mora');}
@@ -831,7 +863,8 @@ function onWhatsAppClick(){
     }).catch(()=>{});
     saveConsent('whatsapp',consentText,'clicked_open_whatsapp');
   }
-  setTimeout(()=>goToCelebration(),1200);
+  user.whatsapp_sent=true;
+  setTimeout(()=>goToEmailOrCelebration(),1200);
 }
 function afterBairros(){openPushScreen();}
 
@@ -853,7 +886,7 @@ async function requestPushFromCTA(){
     toast('Siga os passos acima para instalar e depois ativar 👆');
     setTimeout(()=>{prepareWhatsApp();go('s-whatsapp');},3000);return;
   }
-  if(!('Notification' in window)||!('PushManager' in window)){goToCelebration();return;}
+  if(!('Notification' in window)||!('PushManager' in window)){goToEmailOrCelebration();return;}
   try{
     const permission=await Notification.requestPermission();
     if(permission==='granted'){await savePushToken();toast('Notificações ativas! ✓');}
@@ -869,6 +902,45 @@ async function savePushToken(){
     if(!user.user_id||user.user_id.startsWith('local_'))return;
     await fetch(`${SB_URL}/rest/v1/push_tokens`,{method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},body:JSON.stringify({user_id:user.user_id,endpoint:j.endpoint,p256dh:j.keys?.p256dh,auth:j.keys?.auth,platform:isIOS?'ios_pwa':'web',active:true,created_at:new Date().toISOString()})});
   }catch(e){console.warn('[Push] token:',e);}
+}
+
+// ═══════════════════════════════════════════════
+// EMAIL
+// ═══════════════════════════════════════════════
+function onEmailInput(){
+  const val=document.getElementById('f-email').value.trim();
+  const btn=document.getElementById('email-btn');
+  const ul=document.getElementById('ul-email');
+  const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  if(btn){btn.style.opacity=valid?'1':'0.4';btn.style.pointerEvents=valid?'all':'none';}
+  if(ul)ul.style.transform=valid?'scaleX(1)':'scaleX(0)';
+}
+async function saveEmail(){
+  const val=document.getElementById('f-email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val))return;
+  user.email=val;
+  user.email_confirmed=true;
+  const now=new Date().toISOString();
+  const consentText='Usuário informou e-mail e confirmou recebimento de convites personalizados pelo Fredinho';
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({email:val,email_opt_in:true,email_opt_in_at:now})
+    }).catch(()=>{});
+    saveConsent('email',consentText,'confirmed_email');
+  }
+  // Dispara e-mail de boas-vindas via Edge Function
+  fetch(`${SB_URL}/functions/v1/send-welcome-email`,{
+    method:'POST',
+    headers:{...SB_H,'Content-Type':'application/json'},
+    body:JSON.stringify({email:val,name:user.name,archetype:calcArchetype().primary})
+  }).catch(()=>{});
+  goToCelebration();
+}
+function goToEmailOrCelebration(){
+  // Se não coletou email ainda, passa pela tela de email
+  if(!user.email){go('s-email');}
+  else{goToCelebration();}
 }
 
 // ═══════════════════════════════════════════════
