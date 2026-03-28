@@ -223,14 +223,27 @@ async function reservar(){
   const dataStr = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes} às ${horario}h`;
 
   try {
-    // Bug 3 fix: verifica cap antes de confirmar
-    if(expId && cap > 0){
-      const checkRes = await fetch(
-        `${SB_URL}/rest/v1/convite_events?experiencia_id=eq.${expId}&converteu=eq.true&select=id`,
+    // Busca o restaurant_id diretamente da experiencia no banco (mais confiável que URL)
+    let restaurantId = rid;
+    if(!restaurantId && expId){
+      const expRes = await fetch(
+        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=restaurant_id`,
         { headers: SB_H }
       );
-      const confirmados = await checkRes.json();
-      if(Array.isArray(confirmados) && confirmados.length >= cap){
+      const expData = await expRes.json();
+      restaurantId = expData?.[0]?.restaurant_id || null;
+    }
+
+    // Verifica cap — conta confirmados reais no banco
+    if(expId){
+      const expRes = await fetch(
+        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=cap,total_reservas`,
+        { headers: SB_H }
+      );
+      const expData = await expRes.json();
+      const expCap = expData?.[0]?.cap || 0;
+      const expConf = expData?.[0]?.total_reservas || 0;
+      if(expCap > 0 && expConf >= expCap){
         btn.disabled = false;
         btn.textContent = 'Confirmar reserva →';
         toast('⚠️ Vagas esgotadas. Infelizmente já não há lugares disponíveis.');
@@ -240,25 +253,39 @@ async function reservar(){
 
     btn.textContent = 'Enviando…';
 
-    // Bug 2 fix: atualiza convite_event existente (tem rid) em vez de criar novo sem rid
     if(conviteId){
+      // Atualiza convite existente (criado pelo ExpModal no disparo)
       await fetch(`${SB_URL}/rest/v1/convite_events?id=eq.${conviteId}`, {
         method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
         body: JSON.stringify({ converteu: true, abriu: true })
       });
-    } else if(userId && expId && rid){
-      // fallback: cria novo com restaurant_id correto
+    } else if(expId && restaurantId){
+      // Cria registro novo com restaurant_id buscado do banco
       await fetch(`${SB_URL}/rest/v1/convite_events`, {
         method:'POST', headers:{...SB_H,'Prefer':'return=minimal'},
         body: JSON.stringify({
           experiencia_id: expId,
-          restaurant_id:  rid,
+          restaurant_id:  restaurantId,
           user_id:        userId || null,
           canal:          'telegram',
           converteu:      true,
           abriu:          true,
           enviado_em:     new Date().toISOString(),
         })
+      });
+    }
+
+    // Incrementa total_reservas na experiencia (fonte de verdade para o cap)
+    if(expId){
+      const expRes2 = await fetch(
+        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=total_reservas`,
+        { headers: SB_H }
+      );
+      const expData2 = await expRes2.json();
+      const atual = expData2?.[0]?.total_reservas || 0;
+      await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
+        method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
+        body: JSON.stringify({ total_reservas: atual + lugares })
       });
     }
 
@@ -270,6 +297,7 @@ async function reservar(){
       `${expNome} · ${dataStr} · ${lugares} ${lugares===1?'pessoa':'pessoas'}. O restaurante confirma em breve pelo Telegram.`;
 
   } catch(e){
+    console.error('reservar error:', e);
     btn.disabled = false;
     btn.textContent = 'Confirmar reserva →';
     toast('Erro ao enviar. Tente novamente.');
