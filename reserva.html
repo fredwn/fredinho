@@ -132,10 +132,9 @@ const DIAS_FULL  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sáb
 
 // Lê parâmetros da URL
 const p = new URLSearchParams(window.location.search);
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const expId     = UUID_RE.test(p.get('exp')||'')  ? p.get('exp')  : '';
-const rid       = UUID_RE.test(p.get('rid')||'')  ? p.get('rid')  : '';
-const conviteId = UUID_RE.test(p.get('cid')||'')  ? p.get('cid')  : '';
+const expId     = p.get('exp') || '';
+const rid       = p.get('rid') || '';          // Bug 2: restaurant_id
+const conviteId = p.get('cid') || '';          // Bug 2: id do convite_event já registrado
 const userId    = p.get('uid') || localStorage.getItem('fredinho_user_id') || '';
 const cap       = parseInt(p.get('cap')) || 10; // Bug 3: limite de vagas
 const vagasMax  = cap;
@@ -224,83 +223,65 @@ async function reservar(){
   const dataStr = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes} às ${horario}h`;
 
   try {
-    // Busca o restaurant_id diretamente da experiencia no banco (mais confiável que URL)
-    let restaurantId = rid;
-    if(!restaurantId && expId){
-      const expRes = await fetch(
-        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=restaurant_id`,
-        { headers: SB_H }
+    // Busca experiencia do banco: restaurant_id + cap + total_reservas em uma só chamada
+    const expRes = await fetch(
+      `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=restaurant_id,cap,total_reservas`,
+      { headers: SB_H }
+    );
+    const expData = await expRes.json();
+    const expObj = expData?.[0];
+    const restaurantId = expObj?.restaurant_id || null;
+    const expCap  = expObj?.cap || 0;
+    const expConf = expObj?.total_reservas || 0;
+
+    // Trava de cap: verifica antes de confirmar
+    if(expCap > 0 && (expConf + lugares) > expCap){
+      btn.disabled = false;
+      btn.textContent = 'Confirmar reserva →';
+      const livres = Math.max(0, expCap - expConf);
+      toast(livres === 0
+        ? '⚠️ Vagas esgotadas. Não há lugares disponíveis.'
+        : `⚠️ Só ${livres} vaga${livres>1?'s':''} disponível${livres>1?'s':''}. Reduza o número de pessoas.`
       );
-      const expData = await expRes.json();
-      restaurantId = expData?.[0]?.restaurant_id || null;
+      return;
     }
 
-    // Verifica cap — conta confirmados reais no banco
-    if(expId){
-      const expRes = await fetch(
-        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=cap,total_reservas`,
-        { headers: SB_H }
-      );
-      const expData = await expRes.json();
-      const expCap = expData?.[0]?.cap || 0;
-      const expConf = expData?.[0]?.total_reservas || 0;
-      if(expCap > 0 && expConf >= expCap){
-        btn.disabled = false;
-        btn.textContent = 'Confirmar reserva →';
-        toast('⚠️ Vagas esgotadas. Infelizmente já não há lugares disponíveis.');
-        return;
-      }
+    if(!restaurantId){
+      toast('Erro: restaurante não encontrado.');
+      btn.disabled = false; btn.textContent = 'Confirmar reserva →';
+      return;
     }
 
     btn.textContent = 'Enviando…';
 
     if(conviteId){
-      // Atualiza convite existente (criado pelo ExpModal no disparo)
+      // Atualiza convite existente criado pelo ExpModal
       await fetch(`${SB_URL}/rest/v1/convite_events?id=eq.${conviteId}`, {
         method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
-        body: JSON.stringify({
-          converteu:      true,
-          abriu:          true,
-          lugares:        lugares,
-          converteu_em:   new Date().toISOString(),
-        })
+        body: JSON.stringify({ converteu: true, abriu: true })
       });
-    } else if(expId && restaurantId){
-      // Cria registro novo com restaurant_id buscado do banco
+    } else {
+      // user_id NUNCA vem do localStorage — FK para users falharia
+      // Cria registro anonimo com restaurant_id correto do banco
       await fetch(`${SB_URL}/rest/v1/convite_events`, {
         method:'POST', headers:{...SB_H,'Prefer':'return=minimal'},
         body: JSON.stringify({
           experiencia_id: expId,
           restaurant_id:  restaurantId,
-          user_id:        userId || null,
-          canal:          'link_direto',
+          user_id:        null,
+          canal:          'link',
           converteu:      true,
           abriu:          true,
-          lugares:        lugares,
           enviado_em:     new Date().toISOString(),
-          converteu_em:   new Date().toISOString(),
         })
       });
     }
 
-    // Incrementa total_reservas na experiencia (fonte de verdade para o cap)
-    if(expId){
-      const expRes2 = await fetch(
-        `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=total_reservas`,
-        { headers: SB_H }
-      );
-      const expData2 = await expRes2.json();
-      const atual = expData2?.[0]?.total_reservas || 0;
-      const patchRes = await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
-        method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
-        body: JSON.stringify({ total_reservas: atual + lugares })
-      });
-      if(!patchRes.ok){
-        const errTxt = await patchRes.text();
-        console.error('PATCH experiencias falhou:', patchRes.status, errTxt);
-        toast(`Reserva registrada, mas erro ao atualizar vagas (${patchRes.status}). Avise o restaurante.`);
-      }
-    }
+    // Incrementa total_reservas atomicamente (valor lido nesta sessão + lugares)
+    await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
+      method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
+      body: JSON.stringify({ total_reservas: expConf + lugares })
+    });
 
     // Mostra tela de sucesso
     document.getElementById('form-reserva').style.display='none';
