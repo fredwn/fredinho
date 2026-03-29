@@ -290,10 +290,15 @@ async function reservar(){
       );
       const expData2 = await expRes2.json();
       const atual = expData2?.[0]?.total_reservas || 0;
-      await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
+      const patchRes = await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
         method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
         body: JSON.stringify({ total_reservas: atual + lugares })
       });
+      if(!patchRes.ok){
+        const errTxt = await patchRes.text();
+        console.error('PATCH experiencias falhou:', patchRes.status, errTxt);
+        toast(`Reserva registrada, mas erro ao atualizar vagas (${patchRes.status}). Avise o restaurante.`);
+      }
     }
 
     // Mostra tela de sucesso
