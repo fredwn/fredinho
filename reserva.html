@@ -78,6 +78,17 @@ html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'D
       </div>
     </div>
 
+    <!-- Nome e telefone -->
+    <div class="secao" id="secao-contato" style="display:none">
+      <div class="secao-label">Seus dados</div>
+      <input id="inp-nome" type="text" placeholder="Como você se chama?"
+        autocomplete="given-name"
+        style="width:100%;padding:12px 14px;border:1.5px solid rgba(28,20,16,.12);border-radius:4px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--creme);background:var(--bg);margin-bottom:10px;outline:none"/>
+      <input id="inp-tel" type="tel" placeholder="WhatsApp (opcional)"
+        autocomplete="tel"
+        style="width:100%;padding:12px 14px;border:1.5px solid rgba(28,20,16,.12);border-radius:4px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--creme);background:var(--bg);outline:none"/>
+    </div>
+
     <!-- Resumo -->
     <div class="resumo" id="resumo">
       <div class="resumo-linha">
@@ -210,6 +221,7 @@ function atualizarResumo(){
   }
 
   document.getElementById('resumo').classList.add('show');
+  document.getElementById('secao-contato').style.display = 'block';
 }
 
 async function reservar(){
@@ -255,14 +267,22 @@ async function reservar(){
     btn.textContent = 'Enviando…';
 
     if(conviteId){
-      // Atualiza convite existente criado pelo ExpModal
+      // Atualiza convite existente criado pelo ExpModal — adiciona nome/tel
+      const nomeCliente = document.getElementById('inp-nome')?.value?.trim() || null;
+      const telefone    = document.getElementById('inp-tel')?.value?.trim()  || null;
       await fetch(`${SB_URL}/rest/v1/convite_events?id=eq.${conviteId}`, {
         method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
-        body: JSON.stringify({ converteu: true, abriu: true })
+        body: JSON.stringify({
+          converteu:    true,
+          abriu:        true,
+          nome_cliente: nomeCliente,
+          telefone:     telefone,
+        })
       });
     } else {
       // user_id NUNCA vem do localStorage — FK para users falharia
-      // Cria registro anonimo com restaurant_id correto do banco
+      const nomeCliente = document.getElementById('inp-nome')?.value?.trim() || null;
+      const telefone    = document.getElementById('inp-tel')?.value?.trim()  || null;
       await fetch(`${SB_URL}/rest/v1/convite_events`, {
         method:'POST', headers:{...SB_H,'Prefer':'return=minimal'},
         body: JSON.stringify({
@@ -272,6 +292,8 @@ async function reservar(){
           canal:          'link',
           converteu:      true,
           abriu:          true,
+          nome_cliente:   nomeCliente,
+          telefone:       telefone,
           enviado_em:     new Date().toISOString(),
         })
       });
