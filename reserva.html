@@ -132,9 +132,10 @@ const DIAS_FULL  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sáb
 
 // Lê parâmetros da URL
 const p = new URLSearchParams(window.location.search);
-const expId     = p.get('exp') || '';
-const rid       = p.get('rid') || '';          // Bug 2: restaurant_id
-const conviteId = p.get('cid') || '';          // Bug 2: id do convite_event já registrado
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const expId     = UUID_RE.test(p.get('exp')||'')  ? p.get('exp')  : '';
+const rid       = UUID_RE.test(p.get('rid')||'')  ? p.get('rid')  : '';
+const conviteId = UUID_RE.test(p.get('cid')||'')  ? p.get('cid')  : '';
 const userId    = p.get('uid') || localStorage.getItem('fredinho_user_id') || '';
 const cap       = parseInt(p.get('cap')) || 10; // Bug 3: limite de vagas
 const vagasMax  = cap;
