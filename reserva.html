@@ -257,7 +257,12 @@ async function reservar(){
       // Atualiza convite existente (criado pelo ExpModal no disparo)
       await fetch(`${SB_URL}/rest/v1/convite_events?id=eq.${conviteId}`, {
         method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
-        body: JSON.stringify({ converteu: true, abriu: true })
+        body: JSON.stringify({
+          converteu:      true,
+          abriu:          true,
+          lugares:        lugares,
+          converteu_em:   new Date().toISOString(),
+        })
       });
     } else if(expId && restaurantId){
       // Cria registro novo com restaurant_id buscado do banco
@@ -267,10 +272,12 @@ async function reservar(){
           experiencia_id: expId,
           restaurant_id:  restaurantId,
           user_id:        userId || null,
-          canal:          'telegram',
+          canal:          'link_direto',
           converteu:      true,
           abriu:          true,
+          lugares:        lugares,
           enviado_em:     new Date().toISOString(),
+          converteu_em:   new Date().toISOString(),
         })
       });
     }
