@@ -15,7 +15,7 @@
   --ambar:#9A6B2E;
   --pedra:#6B5E52;--pedra2:#8a7a6e;
   --tr:cubic-bezier(.23,1,.32,1);
-  --green:#15803D;--greenBg:#F0FDF4;
+  --green:#15803D;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
@@ -33,6 +33,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'D
 .lugares-btn:hover{border-color:var(--terra)}
 .lugares-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:300;color:var(--creme);min-width:48px;text-align:center;line-height:1}
 .lugares-label{font-size:12px;color:var(--pedra)}
+.inp{width:100%;padding:12px 14px;border:1.5px solid rgba(28,20,16,.12);border-radius:4px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--creme);background:var(--bg);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--terra)}
 .resumo{background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px;margin-bottom:28px;display:none}
 .resumo.show{display:block}
 .resumo-linha{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
@@ -54,18 +56,17 @@ html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'D
 <div class="wrap">
   <div class="wordmark">Fredinho · Weissmann</div>
 
-  <!-- Formulário de reserva -->
   <div id="form-reserva">
     <div class="exp-nome" id="exp-nome">—</div>
     <div class="exp-detalhe" id="exp-detalhe">—</div>
 
-    <!-- Escolha o dia -->
+    <!-- Qual dia? -->
     <div class="secao">
       <div class="secao-label">Qual dia?</div>
       <div class="dias-grid" id="dias-grid"></div>
     </div>
 
-    <!-- Número de lugares -->
+    <!-- Quantas pessoas? -->
     <div class="secao">
       <div class="secao-label">Quantas pessoas?</div>
       <div class="lugares-wrap">
@@ -78,15 +79,19 @@ html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'D
       </div>
     </div>
 
-    <!-- Nome e telefone -->
+    <!-- Seus dados — só aparece se usuário não identificado (sem uid na URL) -->
     <div class="secao" id="secao-contato" style="display:none">
       <div class="secao-label">Seus dados</div>
-      <input id="inp-nome" type="text" placeholder="Como você se chama?"
+      <input id="inp-nome" class="inp" type="text"
+        placeholder="Seu nome"
         autocomplete="given-name"
-        style="width:100%;padding:12px 14px;border:1.5px solid rgba(28,20,16,.12);border-radius:4px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--creme);background:var(--bg);margin-bottom:10px;outline:none"/>
-      <input id="inp-tel" type="tel" placeholder="WhatsApp (opcional)"
-        autocomplete="tel"
-        style="width:100%;padding:12px 14px;border:1.5px solid rgba(28,20,16,.12);border-radius:4px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--creme);background:var(--bg);outline:none"/>
+        style="margin-bottom:10px"/>
+      <input id="inp-tel" class="inp" type="tel"
+        placeholder="WhatsApp (opcional)"
+        autocomplete="tel"/>
+      <div style="font-size:11px;color:var(--pedra2);margin-top:8px">
+        Só pedimos uma vez. Próximas reservas são automáticas.
+      </div>
     </div>
 
     <!-- Resumo -->
@@ -136,46 +141,49 @@ html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'D
 <script>
 const SB_URL = 'https://jebhatmtzhoxoklfxzgh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q';
-const SB_H = {'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+const SB_H  = {'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
 
 const DIAS_NOMES = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const DIAS_FULL  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 
-// Lê parâmetros da URL
-const p = new URLSearchParams(window.location.search);
-const expId     = p.get('exp') || '';
-const rid       = p.get('rid') || '';          // Bug 2: restaurant_id
-const conviteId = p.get('cid') || '';          // Bug 2: id do convite_event já registrado
-const userId    = p.get('uid') || localStorage.getItem('fredinho_user_id') || '';
-const cap       = parseInt(p.get('cap')) || 10; // Bug 3: limite de vagas
-const vagasMax  = cap;
-const expNome   = decodeURIComponent(p.get('nome') || 'Experiência especial');
-const preco     = parseFloat(p.get('preco')) || 0;
-const diasIds   = (p.get('dias')||'').split(',').map(Number).filter(d=>!isNaN(d)&&d>=0&&d<=6);
-const horario   = parseInt(p.get('horario')) || 19;
+// ── Parâmetros da URL ─────────────────────────────────────────────
+const p       = new URLSearchParams(window.location.search);
+const expId   = p.get('exp') || '';
+const conviteId = p.get('cid') || '';  // id do convite_event criado pelo ExpModal
+const userId  = p.get('uid') || '';    // user_id do Fredinho (se veio de disparo)
+const cap     = parseInt(p.get('cap')) || 0;
+const vagasMax = cap || 20;            // fallback visual
+const expNome = decodeURIComponent(p.get('nome') || 'Experiência especial');
+const preco   = parseFloat(p.get('preco')) || 0;
+const diasIds = (p.get('dias')||'').split(',').map(Number).filter(d=>!isNaN(d)&&d>=0&&d<=6);
+const horario = parseInt(p.get('horario')) || 19;
+
+// Usuário identificado = veio via disparo do Fredinho (tem userId)
+// Nunca pede dados de quem já conhecemos
+const usuarioIdentificado = !!userId;
 
 let diaSel  = null;
 let lugares = 1;
 
-// Preenche cabeçalho
+// ── Preenche cabeçalho ────────────────────────────────────────────
 document.getElementById('exp-nome').textContent = expNome;
 document.getElementById('exp-detalhe').textContent =
-  `${horario}h · ${vagasMax} vagas · ${preco>0?'R$'+preco+'/pessoa':'Grátis'}`;
+  `${horario}h · ${vagasMax > 0 ? vagasMax + ' vagas' : ''} · ${preco > 0 ? 'R$' + preco + '/pessoa' : 'Grátis'}`;
 
-// Monta grid de dias — próximas 4 semanas com os dias permitidos
+// ── Monta grid de dias ────────────────────────────────────────────
 const grid = document.getElementById('dias-grid');
 const hoje = new Date();
 const datas = [];
-for(let i=1; i<=28; i++){
+for(let i = 1; i <= 28; i++){
   const d = new Date(hoje);
-  d.setDate(hoje.getDate()+i);
-  if(diasIds.length===0 || diasIds.includes(d.getDay())){
+  d.setDate(hoje.getDate() + i);
+  if(diasIds.length === 0 || diasIds.includes(d.getDay())){
     datas.push(d);
-    if(datas.length>=6) break;
+    if(datas.length >= 6) break;
   }
 }
 
-datas.forEach(d=>{
+datas.forEach(d => {
   const btn = document.createElement('button');
   btn.className = 'dia-btn';
   const dia = d.getDate().toString().padStart(2,'0');
@@ -189,39 +197,42 @@ datas.forEach(d=>{
 });
 
 function selecionarDia(d, btn){
-  document.querySelectorAll('.dia-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.dia-btn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
   diaSel = d;
   atualizarResumo();
 }
 
 function ajustarLugares(delta){
-  lugares = Math.max(1, Math.min(vagasMax, lugares+delta));
+  lugares = Math.max(1, Math.min(vagasMax || 20, lugares + delta));
   document.getElementById('lugares-num').textContent = lugares;
-  document.getElementById('lugares-label').textContent = lugares===1?'pessoa':'pessoas';
+  document.getElementById('lugares-label').textContent = lugares === 1 ? 'pessoa' : 'pessoas';
   atualizarResumo();
 }
 
 function atualizarResumo(){
   const btn = document.getElementById('btn-reservar');
-  if(!diaSel){ btn.disabled=true; return; }
+  if(!diaSel){ btn.disabled = true; return; }
   btn.disabled = false;
 
-  // Atualiza resumo
   const dia = diaSel.getDate().toString().padStart(2,'0');
   const mes = (diaSel.getMonth()+1).toString().padStart(2,'0');
   document.getElementById('res-nome').textContent    = expNome;
   document.getElementById('res-dia').textContent     = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes}`;
   document.getElementById('res-horario').textContent = `${horario}h`;
-  document.getElementById('res-lugares').textContent = `${lugares} ${lugares===1?'pessoa':'pessoas'}`;
+  document.getElementById('res-lugares').textContent = `${lugares} ${lugares === 1 ? 'pessoa' : 'pessoas'}`;
 
-  if(preco>0){
-    document.getElementById('res-preco-linha').style.display='flex';
-    document.getElementById('res-preco').textContent = `R$${(preco*lugares).toLocaleString('pt-BR')}`;
+  if(preco > 0){
+    document.getElementById('res-preco-linha').style.display = 'flex';
+    document.getElementById('res-preco').textContent = `R$${(preco * lugares).toLocaleString('pt-BR')}`;
   }
 
   document.getElementById('resumo').classList.add('show');
-  document.getElementById('secao-contato').style.display = 'block';
+
+  // Só pede dados se usuário não identificado (reserva via link genérico)
+  if(!usuarioIdentificado){
+    document.getElementById('secao-contato').style.display = 'block';
+  }
 }
 
 async function reservar(){
@@ -235,85 +246,95 @@ async function reservar(){
   const dataStr = `${DIAS_FULL[diaSel.getDay()]}, ${dia}/${mes} às ${horario}h`;
 
   try {
-    // Busca experiencia do banco: restaurant_id + cap + total_reservas em uma só chamada
+    // ── 1. Busca exp do banco: restaurant_id + cap + total_reservas ──
     const expRes = await fetch(
       `${SB_URL}/rest/v1/experiencias?id=eq.${expId}&select=restaurant_id,cap,total_reservas`,
       { headers: SB_H }
     );
     const expData = await expRes.json();
-    const expObj = expData?.[0];
-    const restaurantId = expObj?.restaurant_id || null;
-    const expCap  = expObj?.cap || 0;
-    const expConf = expObj?.total_reservas || 0;
+    const expObj  = Array.isArray(expData) ? expData[0] : null;
 
-    // Trava de cap: verifica antes de confirmar
+    if(!expObj){
+      toast('Experiência não encontrada. Verifique o link.');
+      btn.disabled = false; btn.textContent = 'Confirmar reserva →';
+      return;
+    }
+
+    const restaurantId = expObj.restaurant_id;
+    const expCap       = expObj.cap  || 0;
+    const expConf      = expObj.total_reservas || 0;
+
+    // ── 2. Trava de cap ───────────────────────────────────────────
     if(expCap > 0 && (expConf + lugares) > expCap){
       btn.disabled = false;
       btn.textContent = 'Confirmar reserva →';
       const livres = Math.max(0, expCap - expConf);
       toast(livres === 0
-        ? '⚠️ Vagas esgotadas. Não há lugares disponíveis.'
-        : `⚠️ Só ${livres} vaga${livres>1?'s':''} disponível${livres>1?'s':''}. Reduza o número de pessoas.`
+        ? '⚠️ Vagas esgotadas.'
+        : `⚠️ Só ${livres} vaga${livres > 1 ? 's' : ''} disponível${livres > 1 ? 's' : ''}. Reduza o número de pessoas.`
       );
-      return;
-    }
-
-    if(!restaurantId){
-      toast('Erro: restaurante não encontrado.');
-      btn.disabled = false; btn.textContent = 'Confirmar reserva →';
       return;
     }
 
     btn.textContent = 'Enviando…';
 
+    // ── 3. Nome e telefone (só para reservas anônimas) ────────────
+    const nomeCliente = usuarioIdentificado
+      ? null
+      : (document.getElementById('inp-nome')?.value?.trim() || null);
+    const telefone = usuarioIdentificado
+      ? null
+      : (document.getElementById('inp-tel')?.value?.trim() || null);
+
+    // ── 4. Grava no banco ─────────────────────────────────────────
     if(conviteId){
-      // Atualiza convite existente criado pelo ExpModal — adiciona nome/tel
-      const nomeCliente = document.getElementById('inp-nome')?.value?.trim() || null;
-      const telefone    = document.getElementById('inp-tel')?.value?.trim()  || null;
+      // Veio de disparo → atualiza o convite_event existente
       await fetch(`${SB_URL}/rest/v1/convite_events?id=eq.${conviteId}`, {
-        method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
+        method: 'PATCH',
+        headers: {...SB_H, 'Prefer': 'return=minimal'},
         body: JSON.stringify({
           converteu:    true,
           abriu:        true,
           nome_cliente: nomeCliente,
           telefone:     telefone,
+          lugares:      lugares,
         })
       });
     } else {
-      // user_id NUNCA vem do localStorage — FK para users falharia
-      const nomeCliente = document.getElementById('inp-nome')?.value?.trim() || null;
-      const telefone    = document.getElementById('inp-tel')?.value?.trim()  || null;
+      // Link genérico → cria registro novo
       await fetch(`${SB_URL}/rest/v1/convite_events`, {
-        method:'POST', headers:{...SB_H,'Prefer':'return=minimal'},
+        method: 'POST',
+        headers: {...SB_H, 'Prefer': 'return=minimal'},
         body: JSON.stringify({
           experiencia_id: expId,
           restaurant_id:  restaurantId,
-          user_id:        null,
+          user_id:        null,   // anônimo — nunca FK de localStorage
           canal:          'link',
           converteu:      true,
           abriu:          true,
           nome_cliente:   nomeCliente,
           telefone:       telefone,
+          lugares:        lugares,
           enviado_em:     new Date().toISOString(),
         })
       });
     }
 
-    // Incrementa total_reservas atomicamente (valor lido nesta sessão + lugares)
+    // ── 5. Incrementa total_reservas ──────────────────────────────
     await fetch(`${SB_URL}/rest/v1/experiencias?id=eq.${expId}`, {
-      method:'PATCH', headers:{...SB_H,'Prefer':'return=minimal'},
+      method: 'PATCH',
+      headers: {...SB_H, 'Prefer': 'return=minimal'},
       body: JSON.stringify({ total_reservas: expConf + lugares })
     });
 
-    // Mostra tela de sucesso
-    document.getElementById('form-reserva').style.display='none';
-    const sucesso = document.getElementById('sucesso');
-    sucesso.classList.add('show');
+    // ── 6. Sucesso ────────────────────────────────────────────────
+    document.getElementById('form-reserva').style.display = 'none';
+    document.getElementById('sucesso').classList.add('show');
     document.getElementById('sucesso-sub').textContent =
-      `${expNome} · ${dataStr} · ${lugares} ${lugares===1?'pessoa':'pessoas'}. O restaurante confirma em breve pelo Telegram.`;
+      `${expNome} · ${dataStr} · ${lugares} ${lugares === 1 ? 'pessoa' : 'pessoas'}. O restaurante confirma em breve pelo Telegram.`;
 
   } catch(e){
-    console.error('reservar error:', e);
+    console.error('reservar:', e);
     btn.disabled = false;
     btn.textContent = 'Confirmar reserva →';
     toast('Erro ao enviar. Tente novamente.');
@@ -321,9 +342,10 @@ async function reservar(){
 }
 
 function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2800);
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 </script>
 </body>
