@@ -1,456 +1,545 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>Seu Convite · Weissmann</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --ink:    #1A0F0A;
-      --terra:  #C05F3C;
-      --terra2: #8B3A1E;
-      --ambar:  #D4A053;
-      --stone:  #7A6A5A;
-      --stone2: #A89880;
-      --bg:     #F5EDE0;
-      --bg2:    #EDE0D0;
-      --cream:  #FAF6F0;
-      --white:  #FFFFFF;
-      --green:  #15803D;
-      --red:    #DC2626;
-    }
-    html, body {
-      min-height: 100vh;
-      background: var(--bg);
-      font-family: 'Lato', sans-serif;
-      color: var(--ink);
-      -webkit-font-smoothing: antialiased;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none; z-index: 0; opacity: 0.5;
-    }
-    .border-top {
-      height: 4px;
-      background: linear-gradient(90deg, var(--terra2), var(--ambar), var(--terra));
-      position: relative; z-index: 2;
-    }
-    .page {
-      position: relative; z-index: 1;
-      max-width: 420px; margin: 0 auto;
-      padding: 0 20px 64px; min-height: 100vh;
-    }
-    .header {
-      padding: 32px 0 24px; text-align: center;
-      animation: fadeDown 0.6s ease both;
-    }
-    .header-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 12px; font-weight: 400;
-      letter-spacing: 7px; text-transform: uppercase;
-      color: var(--stone2); margin-bottom: 8px;
-    }
-    .header-divider {
-      width: 28px; height: 1px;
-      background: var(--ambar); margin: 0 auto;
-    }
-    .status-bar {
-      display: flex; justify-content: center;
-      margin-bottom: 20px;
-      animation: fadeDown 0.6s ease 0.1s both; opacity: 0;
-    }
-    .status-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 14px; border-radius: 99px;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .status-pill.valid   { background:#F0FDF4; color:var(--green); border:1.5px solid rgba(21,128,61,.2); }
-    .status-pill.used    { background:#FEF2F2; color:var(--red);   border:1.5px solid rgba(220,38,38,.2); }
-    .status-pill.expired { background:#FEF2F2; color:var(--red);   border:1.5px solid rgba(220,38,38,.2); }
-    .status-pill.loading { background:var(--bg2); color:var(--stone); border:1.5px solid transparent; }
-    .card {
-      background: var(--white); border-radius: 20px; overflow: hidden;
-      border: 1px solid rgba(192,95,60,.12);
-      box-shadow: 0 4px 24px rgba(26,15,10,.08), 0 1px 4px rgba(26,15,10,.04);
-      animation: riseUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.15s both; opacity: 0;
-    }
-    .card-accent {
-      height: 3px;
-      background: linear-gradient(90deg, var(--terra2) 0%, var(--ambar) 50%, var(--terra) 100%);
-    }
-    .card-body { padding: 28px 28px 28px; }
-    .exp-meta { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
-    .exp-emoji { font-size: 28px; line-height: 1; }
-    .exp-badge {
-      padding: 3px 10px; border-radius: 99px; font-size: 10px; font-weight: 700;
-      letter-spacing: 0.06em; text-transform: uppercase;
-      background: rgba(192,95,60,.1); color: var(--terra2);
-      border: 1px solid rgba(192,95,60,.2);
-    }
-    .exp-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 30px; font-weight: 700; line-height: 1.15;
-      color: var(--ink); margin-bottom: 10px; letter-spacing: -0.01em;
-    }
-    .greeting {
-      font-size: 13px; color: var(--stone);
-      line-height: 1.65; margin-bottom: 20px;
-    }
-    .greeting strong { color: var(--ink); font-weight: 700; }
-    .info-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 8px; margin-bottom: 22px;
-    }
-    .info-item {
-      background: var(--bg); border-radius: 10px;
-      padding: 11px 13px;
-      border: 1px solid rgba(192,95,60,.07);
-    }
-    .info-item.full { grid-column: 1 / -1; }
-    .info-label {
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.1em; color: var(--stone2); margin-bottom: 4px;
-    }
-    .info-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 17px; font-weight: 600; color: var(--ink); line-height: 1.2;
-    }
-    .info-value.price { color: var(--terra2); }
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--bg2) 20%, var(--bg2) 80%, transparent);
-      margin: 0 -28px 22px;
-    }
-    .qr-section { text-align: center; }
-    .qr-label {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.12em; color: var(--stone); margin-bottom: 16px;
-    }
-    .qr-wrap { position: relative; display: inline-block; margin-bottom: 12px; }
-    .qr-frame {
-      display: inline-block; padding: 16px;
-      background: var(--white); border-radius: 14px;
-      border: 1.5px solid rgba(192,95,60,.15);
-      box-shadow: 0 2px 16px rgba(26,15,10,.07);
-    }
-    .qr-corner {
-      position: absolute; width: 14px; height: 14px;
-      border-color: var(--terra); border-style: solid;
-    }
-    .qr-corner.tl { top:-1px; left:-1px;   border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
-    .qr-corner.tr { top:-1px; right:-1px;  border-width:2px 2px 0 0; border-radius:0 4px 0 0; }
-    .qr-corner.bl { bottom:-1px; left:-1px; border-width:0 0 2px 2px; border-radius:0 0 0 4px; }
-    .qr-corner.br { bottom:-1px; right:-1px;border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
-    #qrcode canvas, #qrcode img { display:block; border-radius:4px; }
-    .qr-token {
-      font-size: 10px; color: var(--stone2);
-      letter-spacing: 0.1em; word-break: break-all;
-      padding: 0 8px; font-family: monospace;
-    }
-    .instruction {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: rgba(212,160,83,.07);
-      border: 1px solid rgba(212,160,83,.22);
-      border-radius: 12px; padding: 14px 16px; margin-top: 20px;
-    }
-    .instruction-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
-    .instruction-text { font-size: 12px; color: var(--stone); line-height: 1.65; }
-    .instruction-text strong {
-      color: var(--ink); display: block;
-      margin-bottom: 3px; font-size: 13px;
-    }
-    .state-overlay {
-      display: none; flex-direction: column;
-      align-items: center; justify-content: center;
-      text-align: center; padding: 36px 20px; gap: 14px;
-    }
-    .state-overlay.show { display: flex; }
-    .state-icon  { font-size: 52px; }
-    .state-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 24px; font-weight: 700; color: var(--ink);
-    }
-    .state-msg { font-size: 13px; color: var(--stone); line-height: 1.6; max-width: 260px; }
-    .footer {
-      text-align: center; margin-top: 36px;
-      animation: fadeDown 0.6s ease 0.4s both; opacity: 0;
-    }
-    .footer-wordmark {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px; font-weight: 600; letter-spacing: 5px;
-      text-transform: uppercase; color: var(--stone2); margin-bottom: 4px;
-    }
-    .footer-sub { font-size: 10px; color: var(--stone2); letter-spacing: 0.06em; text-transform: uppercase; }
-    .skeleton {
-      background: linear-gradient(90deg, var(--bg2) 25%, var(--bg) 50%, var(--bg2) 75%);
-      background-size: 200% 100%; animation: shimmer 1.4s ease infinite;
-      border-radius: 6px;
-    }
-    @keyframes fadeDown {
-      from { opacity:0; transform:translateY(-10px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    @keyframes riseUp {
-      from { opacity:0; transform:translateY(22px) scale(0.97); }
-      to   { opacity:1; transform:translateY(0) scale(1); }
-    }
-    @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position:-200% 0; }
-    }
-    @keyframes popIn {
-      from { opacity:0; transform:scale(0.92); }
-      to   { opacity:1; transform:scale(1); }
-    }
-    @media (max-width:380px) {
-      .card-body { padding:22px 20px; }
-      .exp-name  { font-size:26px; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Seu Convite — Weissmann</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #1A0F0A;
+    --bg:     #F5EDE0;
+    --bg2:    #EDE0D0;
+    --terra:  #C05F3C;
+    --ambar:  #D4A053;
+    --stone:  #7A6A5A;
+    --stone2: #A89880;
+    --gold:   #9A6B2E;
+    --cream:  #FBF5EC;
+    --green:  #15803D;
+    --red:    #DC2626;
+  }
+
+  html, body {
+    min-height: 100dvh;
+    background: var(--bg);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── grain overlay ─────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: .55;
+  }
+
+  /* ── layout ────────────────────────────────── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100dvh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 0 48px;
+  }
+
+  /* ── header strip ──────────────────────────── */
+  .header {
+    width: 100%;
+    background: var(--ink);
+    padding: 18px 28px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    animation: fadeDown .6s ease both;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 6px; color: #fff;
+  }
+  .logo-sub {
+    font-size: 9px; color: var(--ambar); letter-spacing: 2px;
+    text-transform: uppercase; font-family: 'Lato', sans-serif;
+    font-weight: 700; margin-top: 2px;
+  }
+  .header-badge {
+    font-size: 10px; color: var(--stone2); letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 700;
+  }
+
+  /* ── hero ──────────────────────────────────── */
+  .hero {
+    width: 100%; max-width: 480px;
+    padding: 32px 24px 0;
+    animation: fadeUp .7s ease .1s both;
+  }
+  .hero-eyebrow {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+  }
+  .eyebrow-line {
+    flex: 1; height: 1px; background: linear-gradient(90deg, var(--ambar), transparent);
+  }
+  .eyebrow-text {
+    font-size: 10px; color: var(--ambar); letter-spacing: 2px;
+    font-weight: 700; text-transform: uppercase; white-space: nowrap;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px; font-weight: 700; line-height: 1.1;
+    letter-spacing: .5px; color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .hero-title em { color: var(--terra); font-style: italic; }
+
+  .hero-desc {
+    font-size: 14px; color: var(--stone); line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  /* ── card ──────────────────────────────────── */
+  .card {
+    width: 100%; max-width: 480px;
+    margin: 0 24px;
+    background: var(--cream);
+    border-radius: 20px;
+    border: 1px solid var(--bg2);
+    box-shadow: 0 8px 40px rgba(26,15,10,.10), 0 2px 8px rgba(26,15,10,.06);
+    overflow: hidden;
+    animation: fadeUp .7s ease .25s both;
+  }
+
+  /* ── decorative top bar ─────────────────────── */
+  .card-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--terra), var(--ambar), var(--terra));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0 }
+    100% { background-position: -200% 0 }
+  }
+
+  .card-body { padding: 28px 28px 32px; }
+
+  /* ── meta row ──────────────────────────────── */
+  .meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .meta-item {
+    background: var(--bg); border-radius: 10px;
+    padding: 12px 14px; border: 1px solid var(--bg2);
+  }
+  .meta-label {
+    font-size: 9px; color: var(--stone2); text-transform: uppercase;
+    letter-spacing: 1.5px; font-weight: 700; margin-bottom: 4px;
+  }
+  .meta-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; font-weight: 700; color: var(--ink); line-height: 1.1;
+  }
+  .meta-item.full { grid-column: 1 / -1; }
+
+  /* ── divider ─────────────────────────────── */
+  .divider {
+    display: flex; align-items: center; gap: 12px; margin: 24px 0;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--bg2); }
+  .divider-icon { font-size: 14px; color: var(--stone2); }
+
+  /* ── QR section ─────────────────────────── */
+  .qr-section {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px; text-align: center;
+  }
+  .qr-wrap {
+    position: relative;
+    width: 200px; height: 200px;
+    border-radius: 16px;
+    background: #fff;
+    padding: 12px;
+    box-shadow: 0 4px 24px rgba(26,15,10,.12);
+    border: 1.5px solid var(--bg2);
+    display: flex; align-items: center; justify-content: center;
+    animation: popIn .5s ease .5s both;
+  }
+  .qr-wrap canvas, .qr-wrap img { border-radius: 4px; }
+
+  /* corner decorations */
+  .qr-corner {
+    position: absolute; width: 18px; height: 18px;
+    border-color: var(--terra); border-style: solid;
+  }
+  .qr-corner.tl { top: 6px; left: 6px;  border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+  .qr-corner.tr { top: 6px; right: 6px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+  .qr-corner.bl { bottom: 6px; left: 6px;  border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+  .qr-corner.br { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+
+  .qr-loader {
+    width: 200px; height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-radius: 16px;
+    border: 1.5px dashed var(--bg2);
+  }
+  .spin {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid var(--bg2); border-top-color: var(--terra);
+    animation: spin .8s linear infinite;
+  }
+
+  .qr-instruction {
+    font-size: 12px; color: var(--stone); line-height: 1.6; max-width: 220px;
+  }
+  .qr-instruction strong { color: var(--ink); }
+
+  .token-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg); border: 1px solid var(--bg2);
+    border-radius: 99px; padding: 6px 14px;
+    font-family: monospace; font-size: 11px; color: var(--stone);
+    letter-spacing: .5px;
+    cursor: pointer; transition: all .15s;
+  }
+  .token-pill:hover { border-color: var(--terra); color: var(--terra); }
+  .token-pill .copy-icon { font-size: 12px; }
+
+  .copied-hint {
+    font-size: 11px; color: var(--green); font-weight: 700;
+    opacity: 0; transition: opacity .2s;
+  }
+  .copied-hint.show { opacity: 1; }
+
+  /* ── status banners ─────────────────────── */
+  .banner {
+    border-radius: 12px; padding: 16px 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+    font-size: 13px; line-height: 1.6;
+  }
+  .banner.loading  { background: var(--bg);    border: 1px solid var(--bg2); color: var(--stone); }
+  .banner.error    { background: #FEF2F2;       border: 1px solid rgba(220,38,38,.2); color: var(--red); }
+  .banner.warning  { background: #FFFBEB;       border: 1px solid rgba(154,107,46,.3); color: var(--gold); }
+  .banner.success  { background: #F0FDF4;       border: 1px solid rgba(21,128,61,.2); color: var(--green); }
+
+  /* ── footer ─────────────────────────────── */
+  .footer {
+    width: 100%; max-width: 480px;
+    padding: 24px 24px 0;
+    text-align: center;
+    animation: fadeUp .7s ease .45s both;
+  }
+  .footer-text {
+    font-size: 11px; color: var(--stone2); line-height: 1.7;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 4px;
+    color: var(--stone2); margin-bottom: 6px;
+  }
+
+  /* ── keyframes ──────────────────────────── */
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes popIn    { from { opacity:0; transform:scale(.88) } to { opacity:1; transform:scale(1) } }
+  @keyframes spin     { to { transform:rotate(360deg) } }
+
+  /* ── empty/error page ───────────────────── */
+  .empty-page {
+    min-height: 100dvh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center; gap: 16px;
+  }
+  .empty-icon { font-size: 48px; }
+  .empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 700;
+  }
+  .empty-sub { font-size: 13px; color: var(--stone); line-height: 1.6; max-width: 320px; }
+</style>
 </head>
 <body>
-
-<div class="border-top"></div>
-
-<div class="page">
-
-  <div class="header">
-    <div class="header-logo">Weissmann</div>
-    <div class="header-divider"></div>
-  </div>
-
-  <div class="status-bar">
-    <div class="status-pill loading" id="statusPill">
-      <span>⏳</span><span id="statusText">Verificando convite…</span>
-    </div>
-  </div>
-
-  <div class="card" id="mainCard">
-    <div class="card-accent"></div>
-    <div class="card-body" id="cardBody">
-
-      <!-- Skeleton -->
-      <div id="skeletonState">
-        <div class="skeleton" style="height:36px;width:75%;margin-bottom:12px"></div>
-        <div class="skeleton" style="height:14px;width:55%;margin-bottom:22px"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px">
-          <div class="skeleton" style="height:56px;border-radius:10px"></div>
-          <div class="skeleton" style="height:56px;border-radius:10px"></div>
-        </div>
-        <div style="height:1px;background:var(--bg2);margin:0 -28px 22px"></div>
-        <div class="skeleton" style="height:200px;width:200px;margin:0 auto 14px;border-radius:12px"></div>
-        <div class="skeleton" style="height:11px;width:100%;margin-bottom:8px"></div>
-        <div class="skeleton" style="height:11px;width:65%"></div>
-      </div>
-
-      <!-- Valid -->
-      <div id="validState" style="display:none">
-        <div class="exp-meta">
-          <span class="exp-emoji" id="expEmoji">🍽️</span>
-          <span class="exp-badge">Experiência exclusiva</span>
-        </div>
-        <div class="exp-name"  id="expName">—</div>
-        <div class="greeting"  id="expGreeting"></div>
-        <div class="info-grid" id="infoGrid"></div>
-        <div class="divider"></div>
-        <div class="qr-section">
-          <div class="qr-label">Apresente este QR Code ao chegar</div>
-          <div class="qr-wrap">
-            <div class="qr-frame"><div id="qrcode"></div></div>
-            <div class="qr-corner tl"></div>
-            <div class="qr-corner tr"></div>
-            <div class="qr-corner bl"></div>
-            <div class="qr-corner br"></div>
-          </div>
-          <div class="qr-token" id="qrToken"></div>
-        </div>
-        <div class="instruction">
-          <div class="instruction-icon">💡</div>
-          <div class="instruction-text">
-            <strong>Como usar</strong>
-            Ao chegar ao restaurante, mostre este QR Code para um funcionário. Ele será escaneado para confirmar sua presença e dar baixa no estoque.
-          </div>
-        </div>
-      </div>
-
-      <!-- Used -->
-      <div class="state-overlay" id="usedState">
-        <div class="state-icon">✅</div>
-        <div class="state-title">Convite já utilizado</div>
-        <div class="state-msg">Este QR Code já foi resgatado. Esperamos que tenha aproveitado muito a experiência!</div>
-      </div>
-
-      <!-- Expired -->
-      <div class="state-overlay" id="expiredState">
-        <div class="state-icon">⏰</div>
-        <div class="state-title">Convite expirado</div>
-        <div class="state-msg">Este convite não está mais disponível. Fique de olho nas próximas experiências!</div>
-      </div>
-
-      <!-- Invalid -->
-      <div class="state-overlay" id="invalidState">
-        <div class="state-icon">❌</div>
-        <div class="state-title">Convite não encontrado</div>
-        <div class="state-msg">Não conseguimos localizar este convite. Verifique o link recebido ou entre em contato com o restaurante.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-wordmark">Weissmann</div>
-    <div class="footer-sub">Inteligência gastronômica</div>
-  </div>
-
-</div>
+<div id="app"></div>
 
 <script>
+// ── Parse URL params ─────────────────────────────────────────────
+const params  = new URLSearchParams(location.search);
+const TOKEN   = params.get("token") || "";
+const EXP_ID  = params.get("exp")   || "";
+const EXP_NOME= params.get("nome")  ? decodeURIComponent(params.get("nome")) : "";
+
 const SUPABASE_URL  = "https://jebhatmtzhoxoklfxzgh.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q";
 
-const EMOJIS = {
-  mimo:"🎁", happy_hour:"🍸", executivo:"💼", data_especial:"🥂",
-  brunch:"☕", familia:"👨‍👩‍👧", prato_raro:"🍽️", mesa_chef:"👨‍🍳",
-  prelancamento:"✨", degustacao:"🍷", produtor:"🌿", evento:"🎉",
+// ── Supabase fetch helper ────────────────────────────────────────
+async function sbGet(table, filters = {}) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
+  for (const [k, v] of Object.entries(filters)) {
+    url += `&${k}=eq.${encodeURIComponent(v)}`;
+  }
+  const r = await fetch(url, {
+    headers: {
+      "apikey": SUPABASE_ANON,
+      "Authorization": `Bearer ${SUPABASE_ANON}`,
+      "Accept": "application/json"
+    }
+  });
+  if (!r.ok) throw new Error("Supabase error " + r.status);
+  return r.json();
+}
+
+// ── Format helpers ───────────────────────────────────────────────
+const fmtBRL = v => (+v).toLocaleString("pt-BR", { style:"currency", currency:"BRL", maximumFractionDigits:0 });
+const fmtTime = iso => {
+  if (!iso) return null;
+  // horario_inicio is "HH:MM:SS"
+  const [h, m] = iso.split(":");
+  return `${h}h${m !== "00" ? m : ""}`;
 };
 const DIAS_PT = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
-const params   = new URLSearchParams(location.search);
-const TOKEN    = params.get("token") || "";
-const EXP_ID   = params.get("exp")   || "";
-const EXP_NOME = decodeURIComponent(params.get("nome") || "Experiência");
-
-const $ = id => document.getElementById(id);
-
-function setStatus(type, text) {
-  const icons = { valid:"✅", used:"🔒", expired:"⏰", invalid:"❌", loading:"⏳" };
-  $("statusPill").className = "status-pill " + type;
-  $("statusPill").innerHTML = `<span>${icons[type]||"⏳"}</span><span>${text}</span>`;
+// ── No token → empty state ───────────────────────────────────────
+if (!TOKEN) {
+  document.getElementById("app").innerHTML = `
+    <div class="empty-page">
+      <div class="empty-icon">🔒</div>
+      <div class="empty-title">Convite não encontrado</div>
+      <div class="empty-sub">Este link não contém um convite válido. Verifique se o link foi enviado corretamente.</div>
+    </div>`;
+} else {
+  render();
 }
 
-function fmtBRL(v) {
-  return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}).format(v||0);
-}
-function fmtHora(s) {
-  if (!s) return null;
-  return s.slice(0,5).replace(":", "h");
-}
-function fmtDias(arr) {
-  if (!arr || !arr.length) return null;
-  if (arr.length === 7) return "Todos os dias";
-  return arr.map(d => DIAS_PT[d]).join(", ");
-}
+async function render() {
+  const app = document.getElementById("app");
 
-function buildInfoGrid(exp) {
-  const grid = $("infoGrid");
-  grid.innerHTML = "";
-  const items = [];
+  // ── Skeleton while loading ───────────────────────────────────
+  app.innerHTML = `
+    <div class="page">
+      ${headerHTML()}
+      <div class="hero" style="opacity:.5">
+        <div class="hero-eyebrow">
+          <div class="eyebrow-line"></div>
+          <div class="eyebrow-text">Carregando…</div>
+          <div class="eyebrow-line"></div>
+        </div>
+        <div class="hero-title">Seu convite<br/>especial</div>
+      </div>
+      <div class="card" style="max-width:480px;width:calc(100%-48px);margin:20px 24px 0">
+        <div class="card-bar"></div>
+        <div class="card-body">
+          <div class="banner loading">
+            <div class="spin"></div>
+            <span>Carregando detalhes do seu convite…</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
 
-  const dias = fmtDias(exp.dias_semana);
-  if (dias) items.push({ label:"Dias", value: dias });
-
-  const hi = fmtHora(exp.horario_inicio);
-  const hf = fmtHora(exp.horario_fim);
-  if (hi) items.push({ label:"Horário", value: hf ? `${hi} – ${hf}` : hi });
-
-  if (exp.preco > 0) {
-    items.push({ label:"Valor", value: fmtBRL(exp.preco)+"/pessoa", cls:"price" });
-  } else {
-    items.push({ label:"Valor", value:"Cortesia 🎁" });
-  }
-  if (exp.vagas) {
-    items.push({ label:"Vagas", value:`${exp.vagas} disponíveis` });
-  }
-
-  items.forEach((item, i) => {
-    const odd = items.length % 2 !== 0;
-    const full = odd && i === items.length - 1;
-    const div = document.createElement("div");
-    div.className = "info-item" + (full ? " full" : "");
-    div.innerHTML = `<div class="info-label">${item.label}</div><div class="info-value ${item.cls||""}">${item.value}</div>`;
-    grid.appendChild(div);
-  });
-}
-
-function renderQR(token) {
-  $("qrcode").innerHTML = "";
-  new QRCode($("qrcode"), {
-    text: token,
-    width: 200, height: 200,
-    colorDark: "#1A0F0A", colorLight: "#FFFFFF",
-    correctLevel: QRCode.CorrectLevel.M,
-  });
-  const short = token.length > 22 ? token.slice(0,10)+"…"+token.slice(-6) : token;
-  $("qrToken").textContent = short;
-}
-
-function showValid(convite, exp) {
-  $("skeletonState").style.display = "none";
-  $("validState").style.display    = "block";
-  $("validState").style.animation  = "popIn .45s cubic-bezier(0.22,1,0.36,1) both";
-
-  const tipo = exp.template_id || exp.tipo || "";
-  $("expEmoji").textContent = EMOJIS[tipo] || "🍽️";
-  $("expName").textContent  = exp.nome || EXP_NOME;
-
-  const nome = (convite.nome_usuario || "").trim().split(" ")[0];
-  $("expGreeting").innerHTML = nome
-    ? `Olá, <strong>${nome}</strong>! Este é o seu convite pessoal para uma experiência curada especialmente para você.`
-    : "Este é o seu convite pessoal e intransferível para uma experiência curada especialmente para você.";
-
-  buildInfoGrid(exp);
-  renderQR(TOKEN);
-  setStatus("valid", "Convite válido · Pronto para uso");
-}
-
-function showState(id, type, msg) {
-  $("skeletonState").style.display = "none";
-  $(id).classList.add("show");
-  setStatus(type, msg);
-}
-
-async function init() {
-  if (!TOKEN) { showState("invalidState", "invalid", "Link inválido"); return; }
+  let convite, exp;
   try {
-    const url = `${SUPABASE_URL}/rest/v1/convites?token=eq.${encodeURIComponent(TOKEN)}&select=*,experiencias(*)&limit=1`;
-    const res = await fetch(url, {
-      headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Accept": "application/json" }
-    });
-    if (!res.ok) throw new Error(res.status);
+    // 1 — busca o convite pelo token (queries separadas — sem FK declarada no banco)
+    const r1 = await fetch(
+      `${SUPABASE_URL}/rest/v1/convites?token=eq.${encodeURIComponent(TOKEN)}&limit=1`,
+      { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Accept": "application/json" } }
+    );
+    const rows = await r1.json();
+    convite = rows?.[0];
+    if (!convite) throw new Error("not_found");
 
-    const rows    = await res.json();
-    const convite = rows?.[0];
-
-    if (!convite) { showState("invalidState", "invalid", "Convite não encontrado"); return; }
-
-    if (convite.status === "resgatado") { showState("usedState", "used", "Já utilizado"); return; }
-    if (convite.status === "expirado" || convite.status === "cancelado") {
-      showState("expiredState", "expired", "Convite expirado"); return;
+    // 2 — busca a experiência separadamente via experiencia_id
+    if (convite.experiencia_id) {
+      const r2 = await fetch(
+        `${SUPABASE_URL}/rest/v1/experiencias?id=eq.${encodeURIComponent(convite.experiencia_id)}&limit=1`,
+        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Accept": "application/json" } }
+      );
+      const expRows = await r2.json();
+      exp = expRows?.[0];
     }
-
-    showValid(convite, convite.experiencias || { nome: EXP_NOME });
-
   } catch (e) {
-    // Fallback offline: still show the QR so the guest can be scanned
-    $("skeletonState").style.display = "none";
-    $("validState").style.display    = "block";
-    $("expName").textContent = EXP_NOME || "Experiência";
-    $("expGreeting").textContent = "Apresente este QR Code ao chegar ao restaurante.";
-    $("infoGrid").innerHTML = "";
-    renderQR(TOKEN);
-    setStatus("valid", "Convite · Apresente ao chegar");
+    app.innerHTML = `
+      <div class="page">
+        ${headerHTML()}
+        <div class="card" style="max-width:480px;width:calc(100%-48px);margin:40px 24px 0">
+          <div class="card-bar"></div>
+          <div class="card-body">
+            <div class="banner error">
+              <span style="font-size:20px">⚠️</span>
+              <div>
+                <strong>Convite não encontrado</strong><br/>
+                Este QR Code pode ser inválido ou ter expirado. Entre em contato com o restaurante.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // ── Data assembly ────────────────────────────────────────────
+  const status    = convite.status || "enviado";
+  const nomeExp   = exp?.nome   || EXP_NOME || "Experiência Exclusiva";
+  const descExp   = exp?.descricao || "";
+  const precoExp  = exp?.preco;
+  const horaInicio= exp?.horario_inicio ? fmtTime(exp.horario_inicio) : null;
+  const horaFim   = exp?.horario_fim    ? fmtTime(exp.horario_fim)    : null;
+  const diasSemana= exp?.dias_semana?.length
+    ? exp.dias_semana.map(d => DIAS_PT[d]).join(", ")
+    : null;
+
+  const isResgatado = status === "resgatado";
+  const isExpirado  = status === "expirado" || status === "cancelado";
+  const isValido    = !isResgatado && !isExpirado;
+
+  // ── Build full HTML ──────────────────────────────────────────
+  app.innerHTML = `
+    <div class="page">
+      ${headerHTML()}
+
+      <div class="hero">
+        <div class="hero-eyebrow">
+          <div class="eyebrow-line"></div>
+          <div class="eyebrow-text">Convite exclusivo para você</div>
+          <div class="eyebrow-line"></div>
+        </div>
+        <div class="hero-title">${escH(nomeExp)}</div>
+        ${descExp ? `<div class="hero-desc">${escH(descExp)}</div>` : ""}
+      </div>
+
+      <div class="card" style="max-width:480px;width:calc(100%-48px);margin:20px 24px 0">
+        <div class="card-bar"></div>
+        <div class="card-body">
+
+          ${/* status banner */""}
+          ${isResgatado ? `
+            <div class="banner warning" style="margin-bottom:20px">
+              <span style="font-size:20px">✅</span>
+              <div><strong>Convite já utilizado</strong><br/>Este convite foi resgatado em ${convite.resgatado_em ? new Date(convite.resgatado_em).toLocaleDateString("pt-BR",{day:"2-digit",month:"long",hour:"2-digit",minute:"2-digit"}) : "—"}.</div>
+            </div>` : ""}
+          ${isExpirado ? `
+            <div class="banner error" style="margin-bottom:20px">
+              <span style="font-size:20px">⏰</span>
+              <div><strong>Convite expirado</strong><br/>Este convite não está mais disponível.</div>
+            </div>` : ""}
+
+          ${/* meta grid */""}
+          <div class="meta-grid">
+            ${horaInicio ? `
+              <div class="meta-item">
+                <div class="meta-label">Horário</div>
+                <div class="meta-value">${horaInicio}${horaFim ? " – " + horaFim : ""}</div>
+              </div>` : ""}
+            ${precoExp != null ? `
+              <div class="meta-item">
+                <div class="meta-label">Valor</div>
+                <div class="meta-value">${+precoExp > 0 ? fmtBRL(precoExp) : "Grátis"}<span style="font-size:11px;font-weight:400;color:var(--stone)">/pessoa</span></div>
+              </div>` : ""}
+            ${diasSemana ? `
+              <div class="meta-item full">
+                <div class="meta-label">Dias disponíveis</div>
+                <div class="meta-value" style="font-size:15px">${diasSemana}</div>
+              </div>` : ""}
+            ${convite.nome_usuario ? `
+              <div class="meta-item full">
+                <div class="meta-label">Convidado</div>
+                <div class="meta-value" style="font-size:16px">${escH(convite.nome_usuario)}</div>
+              </div>` : ""}
+          </div>
+
+          ${/* divider + QR */""}
+          <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-icon">✦</div>
+            <div class="divider-line"></div>
+          </div>
+
+          <div class="qr-section">
+            ${isValido ? `
+              <div class="qr-wrap" id="qr-wrap">
+                <div class="qr-corner tl"></div>
+                <div class="qr-corner tr"></div>
+                <div class="qr-corner bl"></div>
+                <div class="qr-corner br"></div>
+                <div id="qr-canvas-wrap"></div>
+              </div>
+              <div class="qr-instruction">
+                <strong>Apresente este QR Code</strong> ao chegar.<br/>
+                O código será lido pelo restaurante para confirmar sua entrada.
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <div class="token-pill" onclick="copyToken()" id="token-pill">
+                  <span class="copy-icon">⎘</span>
+                  <span id="token-display">${TOKEN.slice(0,8)}…${TOKEN.slice(-4)}</span>
+                </div>
+                <div class="copied-hint" id="copied-hint">Copiado!</div>
+              </div>
+            ` : `
+              <div style="font-size:48px;margin-bottom:8px">${isResgatado ? "✅" : "⏰"}</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--stone)">
+                ${isResgatado ? "Entrada confirmada" : "Convite expirado"}
+              </div>
+            `}
+          </div>
+
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-logo">WEISSMANN</div>
+        <div class="footer-text">
+          Este convite é pessoal e intransferível.<br/>
+          Válido apenas para o titular identificado acima.
+        </div>
+      </div>
+    </div>`;
+
+  // ── Generate QR ──────────────────────────────────────────────
+  if (isValido) {
+    try {
+      new QRCode(document.getElementById("qr-canvas-wrap"), {
+        text: TOKEN,           // ← só o token puro no QR
+        width: 170,
+        height: 170,
+        colorDark: "#1A0F0A",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch(e) {
+      // fallback: mostra o token em texto
+      document.getElementById("qr-canvas-wrap").innerHTML =
+        `<div style="font-family:monospace;font-size:9px;color:var(--stone);word-break:break-all;padding:8px;text-align:center">${TOKEN}</div>`;
+    }
   }
 }
 
-init();
+// ── Helpers ──────────────────────────────────────────────────────
+function headerHTML() {
+  return `
+    <div class="header">
+      <div>
+        <div class="logo">WEISSMANN</div>
+        <div class="logo-sub">Experiências exclusivas</div>
+      </div>
+      <div class="header-badge">Convite ✦</div>
+    </div>`;
+}
+
+function escH(str) {
+  return String(str)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function copyToken() {
+  navigator.clipboard?.writeText(TOKEN).then(() => {
+    const hint = document.getElementById("copied-hint");
+    hint.classList.add("show");
+    setTimeout(() => hint.classList.remove("show"), 1800);
+  }).catch(() => {});
+}
 </script>
 </body>
 </html>
