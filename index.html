@@ -422,7 +422,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 <div id="s-email" class="screen">
   <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
   <div class="mcta-inner">
-    <div class="mcta-eyebrow">Último canal</div>
+    <div class="mcta-eyebrow">Canal de avisos</div>
     <h2 class="mcta-title">Por onde te<br><em>encontramos?</em></h2>
     <p class="mcta-sub">Quando surgir algo feito para você, enviamos por aqui. Poucos e-mails, sempre com algo que vale a atenção.</p>
     <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
@@ -437,7 +437,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-actions">
       <button class="btn-p" id="email-btn" onclick="saveEmail()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Confirmar →</button>
     </div>
-    <p class="mcta-skip" onclick="goToCelebration()">Agora não</p>
+    <p class="mcta-skip" onclick="go('s-telegram')">Agora não</p>
   </div>
 </div>
 
@@ -615,31 +615,19 @@ function loadFallbackExperiences(){
   ];
   DECK_AAA=[
     {id:'A1',eixo:'A',pair:1,cat:'FOODIE',name:'Sushi Omakase Tradicional',desc:'O chef seleciona os melhores cortes do dia: peixes brancos e gordos, servidos peça a peça com arroz em temperatura de corpo.',dur:'90–120 min',price:'R$ 290 / pessoa',tier_max:290,scores:{foodie:2,exclusivo:1},photo_unsplash:'pGM4sjt_BdQ'},
-    {id:'A2',eixo:'A',pair:2,needsLike:'A1',cat:'FOODIE',name:'Maturação e Fermentação de Mar e Terra',desc:'Peixes dry-aged e caldos fermentados artesanalmente.',dur:'120–180 min',price:'R$ 450 / pessoa',tier_max:450,scores:{foodie:2,exclusivo:1},photo_unsplash:'rQvTmgGHFzY'},
     {id:'B1',eixo:'B',pair:1,cat:'CLÁSSICO',name:'Entrecôte e Allumettes',desc:'Corte bovino premium selado na brasa, batatas fósforo crocantes e salada de folhas ao Dijon.',dur:'60–90 min',price:'R$ 128 / pessoa',tier_max:128,scores:{classico:2},photo_unsplash:'SVoCPnCMpV0'},
-    {id:'B2',eixo:'B',pair:2,needsLike:'B1',cat:'CLÁSSICO',name:'Beef Wellington com Molho Périgourdine',desc:'Filet mignon envolto em duxelles de cogumelos e massa folhada artesanal, com redução de vinho e trufas.',dur:'90–120 min',price:'R$ 240 / pessoa',tier_max:240,scores:{classico:2,exclusivo:1},photo_unsplash:'RRZM3cwS1DU'},
     {id:'C1',eixo:'C',pair:1,cat:'SUSTENTÁVEL',name:'Menu de Colheita Orgânica Sazonal',desc:'Vegetais de época, queijos artesanais de pequenos produtores e foco no frescor do ingrediente vivo.',dur:'60–80 min',price:'R$ 135 / pessoa',tier_max:135,scores:{sustentavel:2},photo_unsplash:'9aOswReDKPo'},
-    {id:'C2',eixo:'C',pair:2,needsLike:'C1',cat:'SUSTENTÁVEL',name:'Da Pesca ao Prato. Gastronomia Botânica',desc:'Peixes de pesca artesanal com infusões e caldos clarificados complexos.',dur:'90–120 min',price:'R$ 210 / pessoa',tier_max:210,scores:{sustentavel:2,foodie:1},photo_unsplash:'IGfIGP5ONV0'},
     {id:'D1',eixo:'D',pair:1,cat:'SOCIAL',name:'Reserva Prioritária. Mesa de Janela',desc:'A melhor mesa da casa no sábado às 20h30. Sem fila, recepção personalizada e concierge desde a chegada.',dur:'60–120 min',price:'R$ 180 (crédito)',tier_max:180,scores:{social:2,exclusivo:1},photo_unsplash:'oqStZgtoPGU'},
-    {id:'D2',eixo:'D',pair:2,needsLike:'D1',cat:'SOCIAL',name:'Private Membership Sunset',desc:'Acesso a áreas restritas com atendimento dedicado e sem espera. Networking e visibilidade seletiva.',dur:'180–300 min',price:'R$ 450 / pessoa',tier_max:450,scores:{social:2,exclusivo:1},photo_unsplash:'wD1LRb9OeEo'},
     {id:'E1',eixo:'E',pair:1,cat:'EXCLUSIVO',name:'Degustação de Trufas Negras Frescas',desc:'Massa artesanal ou risoto finalizados à mesa com lâminas generosas de trufas negras frescas.',dur:'90 min',price:'R$ 360 / pessoa',tier_max:360,scores:{exclusivo:2},photo_unsplash:'YqdO8HiuKjw'},
-    {id:'E2',eixo:'E',pair:2,needsLike:'E1',cat:'EXCLUSIVO',name:"Chef's Table Carte Blanche",desc:'Mesa única onde o chef cozinha apenas para o seu grupo com os ingredientes mais raros do dia.',dur:'180 min+',price:'R$ 580 / pessoa',tier_max:580,scores:{exclusivo:2,foodie:1},photo_unsplash:'08bOYnH_r_E'},
     {id:'F1',eixo:'F',pair:1,cat:'BOÊMIO',name:'Izakaya Contemporâneo com Saquês Premium',desc:'Petiscos japoneses de alta técnica em balcão animado, harmonizados com saquês de pequenos produtores.',dur:'60–90 min',price:'R$ 180 / pessoa',tier_max:180,scores:{bohemio:2},photo_unsplash:'LVw7M0l0-SE'},
-    {id:'F2',eixo:'F',pair:2,needsLike:'F1',cat:'BOÊMIO',name:'American Bar com Jazz de Coleção',desc:'Balcão clássico, coquetelaria Old School impecável e jazz em vinil. A boemia sofisticada.',dur:'90–150 min',price:'R$ 260 / pessoa',tier_max:260,scores:{bohemio:2,social:1},photo_unsplash:'tN344soypQM'},
   ];
   DECK_MID=[
     {id:'MA1',eixo:'A',pair:1,cat:'FOODIE',name:'Festival de Ceviches e Tiraditos',desc:'Peixes frescos marinados com diferentes leites de tigre e acompanhamentos crocantes.',dur:'50–70 min',price:'R$ 89 / pessoa',tier_max:89,scores:{foodie:2},photo_unsplash:'pGM4sjt_BdQ'},
-    {id:'MA2',eixo:'A',pair:2,needsLike:'MA1',cat:'FOODIE',name:'Menu Degustação Mãos do Chef',desc:'4 tempos com as criações mais recentes. Valor especial terças a quintas.',dur:'90–120 min',price:'R$ 145 / pessoa',tier_max:145,scores:{foodie:2,exclusivo:1},photo_unsplash:'rQvTmgGHFzY'},
     {id:'MB1',eixo:'B',pair:1,cat:'CLÁSSICO',name:'Milanesa de Filet com Risoto de Limão Siciliano',desc:'Carne crocante por fora e suculenta por dentro, com risoto cremoso e refrescante.',dur:'45–60 min',price:'R$ 78 / pessoa',tier_max:78,scores:{classico:2},photo_unsplash:'SVoCPnCMpV0'},
-    {id:'MB2',eixo:'B',pair:2,needsLike:'MB1',cat:'CLÁSSICO',name:'Noite do Entrecôte com Batatas Rústicas e Vinho',desc:'Corte nobre, batatas temperadas e taça de vinho selecionada inclusa.',dur:'60–90 min',price:'R$ 115 / pessoa',tier_max:115,scores:{classico:2},photo_unsplash:'RRZM3cwS1DU'},
     {id:'MC1',eixo:'C',pair:1,cat:'SAUDÁVEL',name:'Bowl de Grãos com Proteína na Brasa',desc:'Quinoa, vegetais tostados e proteína preparada no fogo.',dur:'40–50 min',price:'R$ 65 / pessoa',tier_max:65,scores:{sustentavel:2},photo_unsplash:'9aOswReDKPo'},
-    {id:'MC2',eixo:'C',pair:2,needsLike:'MC1',cat:'SAUDÁVEL',name:'Menu Farm-to-Table Vegetariano 3 Tempos',desc:'Entrada, principal e sobremesa com foco em produtores locais e ingredientes da estação.',dur:'60–80 min',price:'R$ 98 / pessoa',tier_max:98,scores:{sustentavel:2,foodie:1},photo_unsplash:'IGfIGP5ONV0'},
     {id:'MD1',eixo:'D',pair:1,cat:'SOCIAL',name:'Combo Gastrobar: Petiscos e Chopp Duplo',desc:'Croquetes artesanais ou tábua de antepastos com bebidas em dose dupla até as 20h.',dur:'60–120 min',price:'R$ 85 / pessoa',tier_max:85,scores:{social:2},photo_unsplash:'oqStZgtoPGU'},
-    {id:'MD2',eixo:'D',pair:2,needsLike:'MD1',cat:'SOCIAL',name:'Noite de Pizza Artesanal com Jazz ao Vivo',desc:'Pizzas de fermentação natural em ambiente com música ao vivo para grupos de amigos.',dur:'90–150 min',price:'R$ 105 / pessoa',tier_max:105,scores:{social:2,bohemio:1},photo_unsplash:'wD1LRb9OeEo'},
     {id:'ME1',eixo:'E',pair:1,cat:'EXPERIÊNCIA',name:'Noite de Fondues ou Raclettes',desc:'Interatividade à mesa. O prazer de preparar o próprio bocado em ambiente acolhedor.',dur:'90–120 min',price:'R$ 130 / pessoa',tier_max:130,scores:{exclusivo:2},photo_unsplash:'YqdO8HiuKjw'},
-    {id:'ME2',eixo:'E',pair:2,needsLike:'ME1',cat:'EXPERIÊNCIA',name:'Workshop de Coquetelaria ou Vinhos com Jantar',desc:'Noite guiada por especialista para aprender e degustar, terminando com prato principal.',dur:'120–180 min',price:'R$ 180 / pessoa',tier_max:180,scores:{exclusivo:2,social:1},photo_unsplash:'08bOYnH_r_E'},
     {id:'MF1',eixo:'F',pair:1,cat:'BOÊMIO',name:'PF de Luxo. Menu Executivo Especial',desc:'Arroz, feijão caprichado, farofa crocante e carne de primeira. O trivial elevado.',dur:'30–50 min',price:'R$ 58 / pessoa',tier_max:58,scores:{bohemio:2},photo_unsplash:'LVw7M0l0-SE'},
-    {id:'MF2',eixo:'F',pair:2,needsLike:'MF1',cat:'BOÊMIO',name:'Roda de Boteco: Seleção de Clássicos Premiados',desc:'Bolinhos, escondidinhos e caldos: os petiscos mais famosos da casa em sequência.',dur:'60–100 min',price:'R$ 92 / pessoa',tier_max:92,scores:{bohemio:2,social:1},photo_unsplash:'tN344soypQM'},
   ];
   experiencesLoaded=true;
 }
@@ -791,7 +779,7 @@ function doSwipe(dir){
 async function goToFinal(){
   saveProgress(true); // fire-and-forget
   updateTelegramLink();
-  go('s-telegram');
+  go('s-email');
 }
 
 function updateTelegramLink(){
@@ -935,7 +923,7 @@ async function saveEmail(){
     headers:{...SB_H,'Content-Type':'application/json'},
     body:JSON.stringify({email:val,name:user.name,archetype:calcArchetype().primary})
   }).catch(()=>{});
-  goToCelebration();
+  go('s-telegram');
 }
 function goToEmailOrCelebration(){
   // Se não coletou email ainda, passa pela tela de email
@@ -958,30 +946,18 @@ function goToCelebration(){
 // SUPABASE — SALVAR
 // ═══════════════════════════════════════════════
 async function saveInitial(){
-  const savedId=localStorage.getItem('fredinho_user_id');
-  const savedMember=localStorage.getItem('fredinho_member_number');
-  if(savedId){
-    try{
-      const res=await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${savedId}&select=user_id`,{headers:SB_H});
-      const data=await res.json();
-      if(data&&data.length>0){
-        user.user_id=savedId;user.member_number=savedMember||user.member_number;
-        await fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({name:user.name,updated_at:new Date().toISOString()})});
-        updateTelegramLink();return;
-      }
-      localStorage.removeItem('fredinho_user_id');localStorage.removeItem('fredinho_member_number');
-    }catch(e){console.warn(e);}
-  }
+  // Sempre cria registro novo — cada abertura é um usuário diferente
   user.member_number=String(1000+Math.floor(Math.random()*9000));
   try{
     const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
     const rData=await rRes.json();
-    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,user_agent:navigator.userAgent,created_at:new Date().toISOString()})});
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name||null,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,user_agent:navigator.userAgent,created_at:new Date().toISOString()})});
+    if(!res.ok){const err=await res.text();console.warn('[saveInitial] HTTP',res.status,err);throw new Error(err);}
     const d=await res.json();
-    if(d[0]){user.user_id=d[0].user_id;localStorage.setItem('fredinho_user_id',user.user_id);localStorage.setItem('fredinho_member_number',user.member_number);updateTelegramLink();}
+    if(d[0]){user.user_id=d[0].user_id||d[0].id||null;updateTelegramLink();}
+    console.log('[saveInitial] user_id =',user.user_id);
   }catch(e){
-    // Offline: gera ID local — jornada não trava
-    if(!user.user_id){user.user_id='local_'+Date.now();user.member_number=user.member_number||String(1000+Math.floor(Math.random()*9000));}
+    if(!user.user_id){user.user_id='local_'+Date.now();}
     console.warn('[Fredinho] offline — usando ID local');
   }
 }
