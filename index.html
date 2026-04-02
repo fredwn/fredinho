@@ -817,15 +817,23 @@ function onBairroInput(tipo){
 }
 function saveBairroMora(){
   const val=document.getElementById('f-bairro-mora').value.trim();
-  if(val)user.neighborhood_home=val;
+  if(val){
+    user.neighborhood_home=val;
+    // Persiste imediatamente — não depende do fluxo seguinte
+    if(user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_home:val})}).catch(()=>{});
+    }
+  }
   go('s-bairro-trabalha');
   setTimeout(()=>{const el=document.getElementById('f-bairro-trabalha');if(el)el.focus();},500);
 }
 function saveBairroTrabalha(){
   const val=document.getElementById('f-bairro-trabalha').value.trim();
-  if(val)user.neighborhood_work=val;
-  if(user.user_id&&!user.user_id.startsWith('local_')&&(user.neighborhood_home||user.neighborhood_work)){
-    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_home:user.neighborhood_home||null,neighborhood_work:user.neighborhood_work||null})}).catch(()=>{});
+  if(val){
+    user.neighborhood_work=val;
+    if(user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_work:val})}).catch(()=>{});
+    }
   }
   afterBairros();
 }
@@ -845,10 +853,7 @@ function onWhatsAppClick(){
   const now=new Date().toISOString();
   const consentText='Usuário clicou em Abrir WhatsApp e foi direcionado para wa.me/5521967227832 com mensagem de opt-in explícita';
   if(user.user_id&&!user.user_id.startsWith('local_')){
-    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
-      method:'PATCH',headers:SB_H,
-      body:JSON.stringify({whatsapp_opt_in:true,whatsapp_opt_in_at:now,whatsapp_consent_text:consentText})
-    }).catch(()=>{});
+    // Consentimento registrado na tabela consents (lugar correto para auditoria)
     saveConsent('whatsapp',consentText,'clicked_open_whatsapp');
   }
   user.whatsapp_sent=true;
@@ -951,7 +956,7 @@ async function saveInitial(){
   try{
     const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
     const rData=await rRes.json();
-    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name||null,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,user_agent:navigator.userAgent,created_at:new Date().toISOString()})});
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name||null,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,created_at:new Date().toISOString()})});
     if(!res.ok){const err=await res.text();console.warn('[saveInitial] HTTP',res.status,err);throw new Error(err);}
     const d=await res.json();
     if(d[0]){user.user_id=d[0].user_id||d[0].id||null;updateTelegramLink();}
@@ -963,9 +968,39 @@ async function saveInitial(){
 }
 async function saveProgress(final=false){
   if(!user.user_id||user.user_id.startsWith('local_'))return;
-  const ob={user_id:user.user_id,category:'gastronomia',liked_ids:liked.map(e=>e.id),cards_completed:ANCHORS.length+deckPos,axis_foodie:axisScores.foodie||0,axis_classico:axisScores.classico||0,axis_sustentavel:axisScores.sustentavel||0,axis_social:axisScores.social||0,axis_exclusivo:axisScores.exclusivo||0,axis_bohemio:axisScores.bohemio||0,tier:getTier(),tier_score:tierScore,last_card_at:new Date().toISOString(),onboarding_completed:false};
+  const arch=calcArchetype();
+  const ob={
+    user_id:user.user_id,
+    category:'gastronomia',
+    liked_ids:liked.map(e=>e.id),
+    cards_completed:ANCHORS.length+deckPos,
+    primary_archetype:arch.primary||null,
+    secondary_archetype:arch.secondary||null,
+    axis_foodie:axisScores.foodie||0,
+    axis_classico:axisScores.classico||0,
+    axis_sustentavel:axisScores.sustentavel||0,
+    axis_social:axisScores.social||0,
+    axis_exclusivo:axisScores.exclusivo||0,
+    axis_bohemio:axisScores.bohemio||0,
+    tier:getTier(),
+    tier_score:tierScore,
+    last_card_at:new Date().toISOString(),
+    onboarding_completed:false,
+  };
   if(final){ob.onboarding_completed=true;ob.completed_at=new Date().toISOString();}
-  const pr={user_id:user.user_id,alimentacao:user.alimentacao||null,dieta:user.dieta.length?user.dieta:null,contextos:user.contextos.length?user.contextos:null,filhos:user.filhos.length?user.filhos:null,alergia_grave:user.alergia_grave||false,alergias:user.alergias.length?user.alergias:null,vegano:user.vegano||false,updated_at:new Date().toISOString()};
+  const pr={
+    user_id:user.user_id,
+    alimentacao:user.alimentacao||null,
+    dieta:user.dieta.length?user.dieta:null,
+    contextos:user.contextos.length?user.contextos:null,
+    filhos:user.filhos.length?user.filhos:null,
+    alergia_grave:user.alergia_grave||false,
+    alergias:user.alergias.length?user.alergias:null,
+    vegano:user.vegano||false,
+    // price_min / price_max / price_avg: calculados futuramente com base
+    // no histórico de consumo real — não disponível neste momento do onboarding
+    updated_at:new Date().toISOString(),
+  };
   try{
     await fetch(`${SB_URL}/rest/v1/user_onboardings`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(ob)});
     await fetch(`${SB_URL}/rest/v1/user_preferences`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(pr)});
