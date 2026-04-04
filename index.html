@@ -514,7 +514,7 @@ let user={
   alimentacao:'',dieta:[],vegano:false,
   contextos:[],filhos:[],alergias:[],alergia_grave:false,
   familia:[],saude:['nenhuma'],tier:'',
-  source_restaurant:'',utm_source:'',member_number:'',user_id:null,
+  source_restaurant:'',source_restaurant_id:null,convite_ref:'',utm_source:'',member_number:'',user_id:null,
   email:'',email_confirmed:false,
   telegram_connected:false,whatsapp_sent:false,
 };
@@ -534,11 +534,58 @@ const BAIRROS_TRABALHA=['Zona Sul','Barra / Recreio','Zona Norte','Zona Oeste','
 // ═══════════════════════════════════════════════
 (function(){
   const p=new URLSearchParams(window.location.search);
-  user.source_restaurant=p.get('r')||'exemplo';
+  user.source_restaurant=p.get('r')||'';
   user.utm_source=p.get('utm_source')||'';
-  fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=name`,{headers:SB_H})
-    .then(r=>r.json()).then(d=>{document.getElementById('restaurant-name').textContent=d[0]?.name||'um amigo especial';})
-    .catch(()=>{document.getElementById('restaurant-name').textContent='um amigo especial';});
+
+  // Suporte ao novo formato ?src=<rid>&ref=<slug> (gerado pelo ConviteLink)
+  const srcParam=p.get('src')||null;
+  const refParam=p.get('ref')||'';
+  if(srcParam){
+    user.source_restaurant_id=srcParam;
+    user.convite_ref=refParam;
+    sessionStorage.setItem('convite_src',srcParam);
+    sessionStorage.setItem('convite_ref',refParam);
+  } else {
+    // Recupera do sessionStorage (sobrevive a redirects)
+    user.source_restaurant_id=sessionStorage.getItem('convite_src')||null;
+    user.convite_ref=sessionStorage.getItem('convite_ref')||'';
+  }
+
+  // Resolve nome do restaurante
+  if(user.source_restaurant_id){
+    // Veio por ?src= — busca pelo id (uuid)
+    fetch(`${SB_URL}/rest/v1/restaurants?id=eq.${user.source_restaurant_id}&select=name,slug`,{headers:SB_H})
+      .then(r=>r.json()).then(d=>{
+        if(d[0]){
+          document.getElementById('restaurant-name').textContent=d[0].name||'um amigo especial';
+          if(d[0].slug) user.source_restaurant=d[0].slug;
+        }
+      }).catch(()=>{document.getElementById('restaurant-name').textContent='um amigo especial';});
+  } else if(user.source_restaurant){
+    // Compatibilidade: veio por ?r= — busca pelo slug e captura o id
+    fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=name,id`,{headers:SB_H})
+      .then(r=>r.json()).then(d=>{
+        document.getElementById('restaurant-name').textContent=d[0]?.name||'um amigo especial';
+        if(d[0]?.id) user.source_restaurant_id=d[0].id;
+      }).catch(()=>{document.getElementById('restaurant-name').textContent='um amigo especial';});
+  } else {
+    document.getElementById('restaurant-name').textContent='um amigo especial';
+  }
+
+  // Registra acesso via link (silencioso, não bloqueia)
+  if(user.source_restaurant_id){
+    fetch(`${SB_URL}/rest/v1/convite_events`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        restaurant_id:user.source_restaurant_id,
+        ref_slug:user.convite_ref||null,
+        tipo:'acesso_link',
+        abriu:true,
+        enviado_em:new Date().toISOString(),
+      })
+    }).catch(()=>{});
+  }
+
   fetchExperiences();
 })();
 
@@ -779,6 +826,22 @@ function doSwipe(dir){
 async function goToFinal(){
   saveProgress(true); // fire-and-forget
   updateTelegramLink();
+  // Registra conversão se veio por link rastreado
+  if(user.source_restaurant_id&&user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/convite_events`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        restaurant_id:user.source_restaurant_id,
+        ref_slug:user.convite_ref||null,
+        tipo:'cadastro_concluido',
+        user_id:user.user_id,
+        converteu:true,
+        converteu_em:new Date().toISOString(),
+      })
+    }).catch(()=>{});
+    sessionStorage.removeItem('convite_src');
+    sessionStorage.removeItem('convite_ref');
+  }
   go('s-email');
 }
 
@@ -954,13 +1017,39 @@ async function saveInitial(){
   // Sempre cria registro novo — cada abertura é um usuário diferente
   user.member_number=String(1000+Math.floor(Math.random()*9000));
   try{
-    const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
-    const rData=await rRes.json();
-    const res=await fetch(`${SB_URL}/rest/v1/users`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({name:user.name||null,member_number:user.member_number,source_restaurant_id:rData[0]?.id||null,source_url:window.location.href,created_at:new Date().toISOString()})});
+    // Resolve rid: preferência para source_restaurant_id (uuid direto de ?src=)
+    // fallback para busca por slug (compatibilidade com ?r=)
+    let rid=user.source_restaurant_id||null;
+    if(!rid&&user.source_restaurant){
+      const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
+      const rData=await rRes.json();
+      rid=rData[0]?.id||null;
+      if(rid) user.source_restaurant_id=rid;
+    }
+
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=representation'},
+      body:JSON.stringify({
+        name:user.name||null,
+        member_number:user.member_number,
+        source_restaurant_id:rid,
+        source_url:window.location.href,
+        created_at:new Date().toISOString(),
+      })
+    });
     if(!res.ok){const err=await res.text();console.warn('[saveInitial] HTTP',res.status,err);throw new Error(err);}
     const d=await res.json();
     if(d[0]){user.user_id=d[0].user_id||d[0].id||null;updateTelegramLink();}
     console.log('[saveInitial] user_id =',user.user_id);
+
+    // Vincula usuário ao restaurante em restaurant_optins (ignora duplicata)
+    if(rid&&user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/restaurant_optins`,{
+        method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=minimal'},
+        body:JSON.stringify({user_id:user.user_id,restaurant_id:rid})
+      }).catch(()=>{});
+    }
+
   }catch(e){
     if(!user.user_id){user.user_id='local_'+Date.now();}
     console.warn('[Fredinho] offline — usando ID local');
@@ -1071,16 +1160,23 @@ function swipeBtn(dir){
 // ═══════════════════════════════════════════════
 // PARTILHAR
 // ═══════════════════════════════════════════════
+function _buildShareUrl(){
+  const base=window.location.href.split('?')[0];
+  if(user.source_restaurant_id)
+    return base+`?src=${user.source_restaurant_id}`+(user.convite_ref?`&ref=${user.convite_ref}`:'');
+  if(user.source_restaurant) return base+`?r=${user.source_restaurant}`;
+  return base;
+}
 function shareWithFriend(){
   const fn=user.name?user.name.split(' ')[0]:'';
-  const url=window.location.href.split('?')[0]+(user.source_restaurant?`?r=${user.source_restaurant}`:'');
+  const url=_buildShareUrl();
   const txt=fn?`${fn} me convidou para montar um perfil gastronômico no Fredinho. Leva dois minutos.`:`Me convidaram para montar um perfil gastronômico no Fredinho.`;
   if(navigator.share)navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
   else{navigator.clipboard?.writeText(txt+'\n'+url);toast('Link copiado!');}
 }
 function shareWithRestaurant(){
   const fn=user.name?user.name.split(' ')[0]:'';
-  const url=window.location.href.split('?')[0]+(user.source_restaurant?`?r=${user.source_restaurant}`:'');
+  const url=_buildShareUrl();
   const txt=fn?`${fn} quer receber convites personalizados do seu restaurante. O perfil já está pronto.`:`Um cliente quer receber convites personalizados.`;
   if(navigator.share)navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
   else{navigator.clipboard?.writeText(txt+'\n'+url);toast('Link copiado!');}
