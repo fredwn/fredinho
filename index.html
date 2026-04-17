@@ -178,9 +178,61 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 .shake{animation:shake .4s ease}
 .confetti-p{position:fixed;pointer-events:none;z-index:999;animation:cfFall linear forwards}
 @keyframes cfFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+
+/* ════ NAVEGAÇÃO GLOBAL ════ */
+#g-prog{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(28,20,16,.08);z-index:200;opacity:0;transition:opacity .4s}
+#g-prog.vis{opacity:1}
+#g-prog-fill{height:100%;background:linear-gradient(90deg,var(--terra),var(--ambar));transition:width .55s var(--tr);width:0%}
+#g-back{position:fixed;top:max(env(safe-area-inset-top),14px);left:16px;z-index:199;width:36px;height:36px;border-radius:50%;background:#FAFAF8;border:1px solid rgba(28,20,16,.12);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .25s;box-shadow:0 2px 8px rgba(28,20,16,.08);color:var(--creme);text-decoration:none;line-height:1}
+#g-back.vis{opacity:1;pointer-events:all}
+#g-stop{position:fixed;top:max(env(safe-area-inset-top),18px);right:16px;z-index:199;font-size:11px;color:var(--pedra);background:none;border:none;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s;padding:8px;letter-spacing:.3px;font-family:'DM Sans',sans-serif}
+#g-stop.vis{opacity:.5;pointer-events:all}
+#g-stop:hover{opacity:.9}
+#stop-sheet{display:none;position:fixed;inset:0;z-index:300;background:rgba(28,20,16,.45);align-items:flex-end;justify-content:center}
+#stop-sheet.open{display:flex}
+.stop-inner{background:#FAFAF8;border-radius:4px 4px 0 0;padding:28px 28px max(env(safe-area-inset-bottom),28px);width:100%;max-width:480px;animation:fsu .32s var(--tr)}
 </style>
 </head>
 <body>
+
+<div id="g-prog"><div id="g-prog-fill"></div></div>
+<button id="g-back" onclick="goBack()">←</button>
+<button id="g-stop" onclick="abrirStop()">Parar ×</button>
+
+<!-- STOP SHEET -->
+<div id="stop-sheet">
+  <div class="stop-inner">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--creme);margin-bottom:8px">Continuar depois?</div>
+    <p style="font-size:13px;color:var(--pedra);line-height:1.6;margin-bottom:20px">Deixa seu WhatsApp — guardamos onde você parou e avisamos quando quiser retomar.</p>
+    <div style="position:relative;margin-bottom:16px">
+      <input class="name-input" id="f-stop-phone" type="tel" inputmode="numeric" placeholder="(21) 99999-9999" oninput="onStopPhoneInput()" style="font-size:24px">
+      <div class="name-underline" id="ul-stop"></div>
+    </div>
+    <button class="btn-p" id="stop-ok-btn" onclick="confirmarStop()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Guardar e sair →</button>
+    <p class="mcta-skip" onclick="fecharStop()" style="margin-top:12px">Continuar agora</p>
+  </div>
+</div>
+
+<!-- RETOMAR / JÁ FIZ ONBOARDING -->
+<div id="s-retomar" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow" id="retomar-eyebrow">Bem-vindo de volta</div>
+    <h2 class="mcta-title" id="retomar-title">Por onde a gente<br>te <em>encontra?</em></h2>
+    <p class="mcta-sub" id="retomar-sub">Informe o WhatsApp ou e-mail que usou no cadastro.</p>
+    <div style="width:100%;position:relative;margin-bottom:8px;opacity:0;animation:fsu .6s .25s var(--tr) forwards">
+      <input class="name-input" id="f-retomar" type="text" placeholder="WhatsApp ou e-mail"
+        oninput="onRetomarInput()" onkeydown="if(event.key==='Enter')buscarPerfil()"
+        style="font-size:22px" autocorrect="off" autocapitalize="none" spellcheck="false">
+      <div class="name-underline" id="ul-retomar"></div>
+    </div>
+    <div id="retomar-status" style="font-size:12px;color:var(--pedra);min-height:18px;margin-bottom:16px;opacity:.8"></div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="retomar-btn" onclick="buscarPerfil()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Continuar →</button>
+    </div>
+    <p class="mcta-skip" onclick="go('s-welcome')">Voltar</p>
+  </div>
+</div>
 
 <!-- TELA 1 — HOOK -->
 <div id="s-welcome" class="screen active">
@@ -199,6 +251,10 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
       <button class="btn-p" onclick="go('s-howto')">Começar →</button>
     </div>
     <p class="wlc-source">Convidado por <strong id="restaurant-name">…</strong></p>
+    <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;align-items:center;opacity:0;animation:fsu .5s 1.3s var(--tr) forwards">
+      <p onclick="iniciarRetomar('novo')" style="font-size:12px;color:rgba(107,94,82,.4);cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--pedra)'" onmouseout="this.style.color='rgba(107,94,82,.4)'">Já me cadastrei em outro restaurante →</p>
+      <p onclick="iniciarRetomar('retomar')" style="font-size:12px;color:rgba(107,94,82,.4);cursor:pointer;transition:color .2s" onmouseover="this.style.color='var(--pedra)'" onmouseout="this.style.color='rgba(107,94,82,.4)'">Continuar de onde parei →</p>
+    </div>
   </div>
 </div>
 
@@ -335,7 +391,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
   <div class="mcta-inner">
     <div class="mcta-eyebrow">Contexto</div>
     <h2 class="mcta-title">Onde costuma <em>almoçar?</em></h2>
-    <p class="mcta-sub" style="margin-bottom:32px">Para sugestões no seu dia a dia — bairro ou região.</p>
+    <p class="mcta-sub" style="margin-bottom:32px">Pode listar mais de um lugar — separados por vírgula.</p>
     <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
       <input class="name-input" id="f-bairro-trabalha" type="text" placeholder="Ex: Centro, Botafogo, Barra…"
         autocorrect="off" spellcheck="false" style="font-size:26px"
@@ -638,11 +694,124 @@ function pwaDismiss(){document.getElementById('pwa-banner').classList.remove('sh
 // ═══════════════════════════════════════════════
 // NAVEGAÇÃO
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// NAVEGAÇÃO GLOBAL — PROGRESS + BACK + STOP
+// ═══════════════════════════════════════════════
+const SCREEN_PROG={'s-welcome':0,'s-howto':5,'s-name':10,'s-retomar':5,'s-survey':20,'s-tinder':30,'s-email':75,'s-telegram':70,'s-bairro-mora':82,'s-bairro-trabalha':87,'s-whatsapp':92,'s-phone':95,'s-push':90,'s-final':100};
+const BACK_SCREENS=['s-howto','s-name','s-retomar','s-email','s-telegram','s-bairro-mora','s-bairro-trabalha','s-whatsapp','s-phone'];
+const STOP_SCREENS=['s-survey','s-tinder','s-email','s-telegram','s-bairro-mora','s-bairro-trabalha'];
+let navStack=[];
 function go(id){
+  if(navStack[navStack.length-1]!==id)navStack.push(id);
+  _syncNav(id);
   document.querySelectorAll('.screen').forEach(s=>{
     if(s.id===id){s.classList.remove('exit');s.classList.add('active');}
     else{s.classList.remove('active');s.classList.add('exit');setTimeout(()=>s.classList.remove('exit'),550);}
   });
+}
+function _syncNav(id){
+  const fill=document.getElementById('g-prog-fill');
+  const prog=document.getElementById('g-prog');
+  const pct=SCREEN_PROG[id];
+  if(prog)prog.classList.toggle('vis',id!=='s-welcome'&&id!=='s-final');
+  if(fill&&pct!==undefined)fill.style.width=pct+'%';
+  const back=document.getElementById('g-back');
+  if(back)back.classList.toggle('vis',BACK_SCREENS.includes(id));
+  const stop=document.getElementById('g-stop');
+  if(stop)stop.classList.toggle('vis',STOP_SCREENS.includes(id));
+}
+function goBack(){
+  if(navStack.length<2)return;
+  navStack.pop();
+  const prev=navStack[navStack.length-1];
+  navStack.pop();
+  go(prev);
+}
+// Stop flow
+function abrirStop(){document.getElementById('stop-sheet').classList.add('open');}
+function fecharStop(){
+  document.getElementById('stop-sheet').classList.remove('open');
+  const inp=document.getElementById('f-stop-phone');if(inp)inp.value='';
+  const btn=document.getElementById('stop-ok-btn');if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';}
+  const ul=document.getElementById('ul-stop');if(ul)ul.style.transform='scaleX(0)';
+}
+function onStopPhoneInput(){
+  const raw=document.getElementById('f-stop-phone').value.replace(/\D/g,'');
+  const btn=document.getElementById('stop-ok-btn');const ul=document.getElementById('ul-stop');const valid=raw.length>=10;
+  if(btn){btn.style.opacity=valid?'1':'.4';btn.style.pointerEvents=valid?'all':'none';}
+  if(ul)ul.style.transform=valid?'scaleX(1)':'scaleX(0)';
+}
+async function confirmarStop(){
+  const raw=document.getElementById('f-stop-phone').value.replace(/\D/g,'');if(raw.length<10)return;
+  const e164='+55'+raw;user.phone=e164;const now=new Date().toISOString();
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({phone:e164,whatsapp_opt_in:true,whatsapp_opt_in_at:now,onboarding_paused:true})}).catch(()=>{});
+    saveConsent('whatsapp','Usuário pausou jornada e autorizou contato via WhatsApp para retomar','paused_journey');
+  }
+  toast('Guardado! Te avisamos para retomar. ✓');
+  setTimeout(()=>{fecharStop();},1400);
+}
+// Retomar / já fiz onboarding
+let _retomarModo='retomar';
+function iniciarRetomar(modo){
+  _retomarModo=modo;
+  const eyebrow=document.getElementById('retomar-eyebrow');
+  const title=document.getElementById('retomar-title');
+  const sub=document.getElementById('retomar-sub');
+  if(modo==='novo'){
+    if(eyebrow)eyebrow.textContent='Outro restaurante';
+    if(title)title.innerHTML='Já se cadastrou<br>por <em>aqui?</em>';
+    if(sub)sub.textContent='Informe o WhatsApp ou e-mail que usou antes — registramos você no novo restaurante na hora.';
+  }else{
+    if(eyebrow)eyebrow.textContent='Bem-vindo de volta';
+    if(title)title.innerHTML='Por onde a gente<br>te <em>encontra?</em>';
+    if(sub)sub.textContent='Informe o WhatsApp ou e-mail que usou no cadastro e continuamos de onde parou.';
+  }
+  const inp=document.getElementById('f-retomar');if(inp)inp.value='';
+  const st=document.getElementById('retomar-status');if(st)st.textContent='';
+  const btn=document.getElementById('retomar-btn');if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';btn.textContent='Continuar →';}
+  go('s-retomar');
+}
+function onRetomarInput(){
+  const val=document.getElementById('f-retomar').value.trim();
+  const btn=document.getElementById('retomar-btn');const ul=document.getElementById('ul-retomar');const valid=val.length>=5;
+  if(btn){btn.style.opacity=valid?'1':'.4';btn.style.pointerEvents=valid?'all':'none';}
+  if(ul)ul.style.transform=valid?'scaleX(1)':'scaleX(0)';
+}
+async function buscarPerfil(){
+  const val=document.getElementById('f-retomar').value.trim();if(val.length<5)return;
+  const status=document.getElementById('retomar-status');const btn=document.getElementById('retomar-btn');
+  if(btn){btn.style.opacity='.4';btn.style.pointerEvents='none';btn.textContent='Buscando…';}
+  if(status)status.textContent='Procurando seu perfil…';
+  try{
+    let found=null;
+    const raw=val.replace(/\D/g,'');
+    if(raw.length>=10){
+      const e164='+55'+raw;
+      const r=await fetch(`${SB_URL}/rest/v1/users?phone=eq.${encodeURIComponent(e164)}&select=user_id,name,member_number,email,phone&limit=1`,{headers:SB_H});
+      const data=await r.json();if(Array.isArray(data)&&data.length)found=data[0];
+    }
+    if(!found&&val.includes('@')){
+      const r=await fetch(`${SB_URL}/rest/v1/users?email=eq.${encodeURIComponent(val)}&select=user_id,name,member_number,email,phone&limit=1`,{headers:SB_H});
+      const data=await r.json();if(Array.isArray(data)&&data.length)found=data[0];
+    }
+    if(found){
+      user.user_id=found.user_id;user.name=found.name||'';user.member_number=found.member_number||'';user.email=found.email||'';user.phone=found.phone||'';
+      if(_retomarModo==='novo'&&user.source_restaurant_id){
+        fetch(`${SB_URL}/rest/v1/user_restaurants`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({user_id:user.user_id,restaurant_id:user.source_restaurant_id})}).catch(()=>{});
+        fetch(`${SB_URL}/rest/v1/restaurant_optins`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({user_id:user.user_id,restaurant_id:user.source_restaurant_id})}).catch(()=>{});
+      }
+      if(status)status.textContent='';
+      toast(`Boa, ${(found.name||'').split(' ')[0]||'você'}! Perfil encontrado ✓`);
+      setTimeout(()=>goToCelebration(),900);
+    }else{
+      if(status)status.textContent='Perfil não encontrado. Confira o número ou e-mail.';
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='all';btn.textContent='Tentar novamente →';}
+    }
+  }catch(e){
+    if(status)status.textContent='Erro ao buscar. Tente novamente.';
+    if(btn){btn.style.opacity='1';btn.style.pointerEvents='all';btn.textContent='Tentar novamente →';}
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1225,6 +1394,9 @@ function updateProgress(){
   const pct=Math.min(100,Math.round(done/Math.max(total,1)*100));
   document.getElementById('t-prog').style.width=pct+'%';
   document.getElementById('t-cnt').textContent=pct+'%';
+  // barra global: swipes mapeados para 30–72%
+  const fill=document.getElementById('g-prog-fill');
+  if(fill)fill.style.width=(30+Math.round(pct*0.42))+'%';
 }
 function showFeedback(msg){const el=document.getElementById('t-feedback');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700);}
 function makeCard(exp){
@@ -1232,7 +1404,7 @@ function makeCard(exp){
   const tmax=exp.tier_max||0;
   const tierClass=tmax>=400?'tier-high':tmax>=150?'tier-mid':'tier-low';
   const photoUrl=`https://images.unsplash.com/photo-${exp.photo_unsplash||'1414235077428-338140e5f810'}?w=800&q=80&auto=format&fit=crop`;
-  d.innerHTML=`<div class="card-visual"><img class="card-img" src="${photoUrl}" alt="${exp.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-fallback"><div class="card-img-fallback-name">${exp.name}</div><div class="card-img-fallback-line"></div></div><div class="card-badge">${exp.cat}</div></div><div class="card-divider"></div><div class="card-body"><div class="card-eyebrow"><div class="card-round-dot"></div><span class="card-cat-label">${exp.cat}</span></div><div class="card-title">${exp.name}</div><div class="card-desc">${exp.desc}</div><div class="card-price-row ${tierClass}"><div class="cpr-price"><span class="cpr-label">por pessoa</span><span class="cpr-val">${exp.price}</span></div><div class="cpr-dur"><span class="cpr-label">duração</span><span class="cpr-val">${exp.dur}</span></div></div></div><div class="stamp stamp-yes">ADORO</div><div class="stamp stamp-no">PASSO</div>`;
+  d.innerHTML=`<div class="card-visual"><img class="card-img" src="${photoUrl}" alt="${exp.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-fallback"><div class="card-img-fallback-name">${exp.name}</div><div class="card-img-fallback-line"></div></div><div class="card-badge">${exp.cat}</div></div><div class="card-divider"></div><div class="card-body"><div class="card-eyebrow"><div class="card-round-dot"></div><span class="card-cat-label">${exp.cat}</span></div><div class="card-title">${exp.name}</div><div class="card-desc">${exp.desc}</div><div class="card-price-row ${tierClass}"><div class="cpr-price"><span class="cpr-label">por pessoa</span><span class="cpr-val">${exp.price}</span></div></div></div><div class="stamp stamp-yes">ADORO</div><div class="stamp stamp-no">PASSO</div>`;
   return d;
 }
 function setPos(card,pos,animate){
