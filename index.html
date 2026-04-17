@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#EFEFED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fredinho">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Fredinho por WEISSMANN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EFEFED;--bg2:#E7E7E5;
+  --terra:#8B3A1E;--terra2:#a04422;
+  --creme:#1C1410;--creme2:#3a2e26;
+  --ambar:#9A6B2E;
+  --pedra:#6B5E52;--pedra2:#8a7a6e;
+  --tr:cubic-bezier(.23,1,.32,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none;touch-action:manipulation}
+
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .42s var(--tr),transform .42s var(--tr);transform:translateY(20px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
+.screen.exit{opacity:0;transform:translateY(-20px);pointer-events:none}
+.grain{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.orb-top{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:560px;height:560px;background:radial-gradient(ellipse at 50% 30%,rgba(139,58,30,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
+.top-rule{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--terra) 35%,var(--ambar) 65%,transparent);opacity:.3;z-index:1}
+
+.btn-p{background:var(--terra);color:#EFEFED;border:none;border-radius:4px;padding:17px 0;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:all .28s var(--tr);position:relative;overflow:hidden;letter-spacing:.3px}
+.btn-p::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 55%)}
+.btn-p:hover{background:var(--terra2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,58,30,.25)}
+.btn-p:active{transform:scale(.97)}
+
+@keyframes fsu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ════ HOOK ════ */
+#s-welcome{background:var(--bg);justify-content:center}
+.wlc-inner{position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center}
+.wordmark{display:flex;align-items:baseline;gap:10px;margin-bottom:52px;opacity:.4}
+.wm-f{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;letter-spacing:4.5px;text-transform:uppercase;color:var(--creme)}
+.wm-sep{width:1px;height:8px;background:var(--pedra);opacity:.3;align-self:center}
+.wm-w{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:400;letter-spacing:4.5px;text-transform:uppercase;color:var(--ambar)}
+.hook-body{text-align:center;margin-bottom:48px}
+.hook-line{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,8.5vw,46px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme);opacity:0;display:block}
+.hook-line.l1{animation:fsu .8s .1s var(--tr) forwards}
+.hook-line.l2{animation:fsu .8s .3s var(--tr) forwards}
+.hook-line.l3{animation:fsu .8s .5s var(--tr) forwards}
+.hook-line em{font-style:normal;font-weight:700;color:var(--terra)}
+.hook-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,4vw,20px);font-style:italic;color:var(--pedra);margin-top:22px;opacity:0;animation:fsu .7s .72s var(--tr) forwards;display:block}
+.wlc-cta{opacity:0;animation:fsu .6s 1s var(--tr) forwards;width:100%;max-width:290px}
+.wlc-source{font-size:11px;color:rgba(107,94,82,.5);font-weight:300;text-align:center;margin-top:16px;opacity:0;animation:fsu .5s 1.15s var(--tr) forwards;letter-spacing:.3px}
+.wlc-source strong{color:var(--ambar);font-weight:500;opacity:.8}
+
+/* ════ NOME ════ */
+#s-name{background:var(--bg);justify-content:center}
+.name-inner{position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center}
+.name-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px;opacity:0;animation:fsu .6s .05s var(--tr) forwards}
+.name-hl{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,9vw,48px);font-weight:300;font-style:italic;line-height:1.1;color:var(--creme);margin-bottom:44px;opacity:0;animation:fsu .7s .18s var(--tr) forwards}
+.name-hl em{font-style:normal;font-weight:600;color:var(--terra)}
+.name-field-wrap{width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .32s var(--tr) forwards}
+.name-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(28,20,16,.15);padding:6px 0 16px;font-size:32px;font-weight:300;color:var(--creme);outline:none;font-family:'Cormorant Garamond',serif;font-style:italic;caret-color:var(--terra);-webkit-appearance:none}
+.name-input::placeholder{color:rgba(28,20,16,.18)}
+.name-underline{position:absolute;bottom:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--terra),var(--ambar));transform:scaleX(0);transform-origin:left;transition:transform .45s var(--tr)}
+.name-input:focus~.name-underline{transform:scaleX(1)}
+.name-cta{opacity:0;transform:translateY(8px);transition:opacity .35s var(--tr),transform .35s var(--tr);pointer-events:none}
+.name-cta.show{opacity:1;transform:translateY(0);pointer-events:all}
+.name-skip{font-size:12px;color:var(--pedra);font-weight:300;text-align:center;margin-top:14px;cursor:pointer;transition:color .2s;opacity:0;animation:fsu .5s .9s var(--tr) forwards}
+.name-skip:hover{color:var(--creme)}
+
+/* ════ MICRO-CTA base ════ */
+.mcta-inner{position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center}
+.mcta-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:16px;opacity:0;animation:fsu .6s .05s var(--tr) forwards}
+.mcta-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7.5vw,40px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme);margin-bottom:10px;opacity:0;animation:fsu .7s .15s var(--tr) forwards}
+.mcta-title em{font-style:normal;font-weight:600;color:var(--terra)}
+.mcta-sub{font-size:13px;color:var(--pedra);line-height:1.7;font-weight:300;margin-bottom:32px;opacity:0;animation:fsu .6s .25s var(--tr) forwards}
+.mcta-actions{display:flex;flex-direction:column;gap:10px;opacity:0;animation:fsu .6s .38s var(--tr) forwards}
+.mcta-skip{font-size:12px;color:rgba(107,94,82,.45);text-align:center;margin-top:16px;cursor:pointer;transition:color .2s}
+.mcta-skip:hover{color:var(--pedra)}
+
+/* ════ EMAIL INPUT ════ */
+.email-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(28,20,16,.15);padding:6px 0 16px;font-size:24px;font-weight:300;color:var(--creme);outline:none;font-family:'Cormorant Garamond',serif;font-style:italic;caret-color:var(--terra);-webkit-appearance:none;-webkit-tap-highlight-color:transparent}
+.email-input::placeholder{color:rgba(28,20,16,.18)}
+.email-underline{position:absolute;bottom:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--terra),var(--ambar));transform:scaleX(0);transform-origin:left;transition:transform .45s var(--tr)}
+.email-input:focus~.email-underline{transform:scaleX(1)}
+
+/* ════ CHIPS bairro ════ */
+.chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;opacity:0;animation:fsu .6s .25s var(--tr) forwards}
+.chip{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:13px 10px;cursor:pointer;transition:border-color .15s,background .15s;font-size:13px;color:var(--creme2);font-weight:400;user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;line-height:1.3}
+.chip.sel{border-color:var(--terra);background:rgba(139,58,30,.08);color:var(--creme);font-weight:500}
+.chip:active{opacity:.7}
+
+/* ════ SURVEY ════ */
+#s-survey{background:var(--bg);justify-content:center;align-items:center}
+.sv-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 28px;max-width:400px;width:100%}
+.sv-greeting{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,7vw,34px);font-weight:300;font-style:italic;color:var(--creme);line-height:1.2;margin-bottom:8px}
+.sv-greeting em{font-style:normal;font-weight:600;color:var(--terra)}
+.sv-sub{font-size:13px;color:var(--pedra);font-weight:300;margin-bottom:28px;line-height:1.6}
+.sv-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:28px}
+.sv-chip{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:12px 20px;cursor:pointer;transition:border-color .15s,background .15s;font-size:14px;color:var(--creme2);font-weight:400;user-select:none;-webkit-tap-highlight-color:transparent}
+.sv-chip.sel{border-color:var(--terra);background:rgba(139,58,30,.08);color:var(--creme);font-weight:500}
+.sv-chips-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;width:100%}
+.sv-chip-2{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:14px 16px;cursor:pointer;transition:border-color .15s,background .15s;font-size:14px;color:var(--creme2);font-weight:400;user-select:none;-webkit-tap-highlight-color:transparent}
+.sv-chip-2.sel{border-color:var(--terra);background:rgba(139,58,30,.08);color:var(--creme);font-weight:500}
+.sv-skip{font-size:12px;color:rgba(107,94,82,.5);cursor:pointer;margin-top:12px;transition:color .2s}
+.sv-skip:hover{color:var(--pedra)}
+
+/* ════ SWIPE ════ */
+#s-tinder{background:#E7E7E5;overflow:hidden;color:var(--creme)}
+.t-header{position:absolute;top:0;left:0;right:0;z-index:20;padding:max(env(safe-area-inset-top),46px) 20px 14px;background:linear-gradient(to bottom,rgba(231,231,229,1) 70%,rgba(231,231,229,0));display:flex;align-items:center;justify-content:space-between}
+.t-brand{display:flex;align-items:center;gap:8px}
+.t-face{width:26px;height:26px}
+.t-name-lbl{font-size:13px;font-weight:600;color:var(--creme);letter-spacing:.3px}
+.t-user-name{font-size:11px;color:var(--pedra);font-weight:400}
+.t-badge{background:var(--terra);color:#EFEFED;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:4px}
+.t-prog-wrap{display:flex;align-items:center;gap:9px}
+.prog-bar{width:60px;height:2px;background:rgba(28,20,16,.12);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--terra);border-radius:2px;transition:width .5s var(--tr)}
+.prog-cnt{font-size:12px;color:var(--pedra);font-weight:500;min-width:30px;text-align:right}
+.card-stack{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding-top:88px;padding-bottom:120px}
+.swipe-card{position:absolute;width:calc(100vw - 32px);max-width:374px;height:min(calc(100vh - 88px - 120px - 16px),580px);border-radius:4px;overflow:hidden;cursor:grab;user-select:none;touch-action:none;transform-origin:center bottom;will-change:transform;background:#FAFAF8;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(28,20,16,.06),0 8px 24px rgba(28,20,16,.09),0 0 0 1px rgba(28,20,16,.06)}
+.swipe-card:active{cursor:grabbing}
+.card-visual{position:relative;flex:0 0 56%;overflow:hidden;background:#D8D6D2}
+.card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .7s var(--tr)}
+.swipe-card:hover .card-img{transform:scale(1.03)}
+.card-img-fallback{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#D0CEC9;z-index:1}
+.card-img-fallback-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;font-style:italic;color:rgba(28,20,16,.55);text-align:center;line-height:1.2}
+.card-img-fallback-line{width:32px;height:1px;background:rgba(154,107,46,.4);margin:12px auto 0}
+.card-badge{position:absolute;top:12px;left:12px;z-index:4;background:rgba(239,239,237,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--creme);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:700;padding:4px 10px;border-radius:4px}
+.card-divider{height:1px;flex-shrink:0;background:rgba(28,20,16,.07)}
+.card-body{flex:0 0 44%;display:flex;flex-direction:column;padding:13px 18px 14px;background:#FAFAF8;overflow:hidden}
+.card-eyebrow{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-shrink:0}
+.card-round-dot{width:4px;height:4px;border-radius:50%;background:var(--terra);flex-shrink:0;opacity:.6}
+.card-cat-label{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--terra);font-weight:600}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,5vw,25px);font-weight:700;color:var(--creme);line-height:1.05;margin-bottom:5px;flex-shrink:0}
+.card-desc{font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300;flex:1;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.card-price-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:10px;padding-top:9px;flex-shrink:0;border-top:1px solid rgba(28,20,16,.07)}
+.cpr-price{display:flex;flex-direction:column;gap:1px}
+.cpr-dur{display:flex;flex-direction:column;gap:1px;align-items:flex-end;text-align:right}
+.cpr-label{font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--pedra2);font-weight:500}
+.cpr-val{font-size:13px;font-weight:700;color:var(--creme);font-family:'DM Sans',sans-serif}
+.card-price-row.tier-low .cpr-val{color:var(--pedra)}
+.card-price-row.tier-mid .cpr-price .cpr-val{color:var(--ambar)}
+.card-price-row.tier-high .cpr-price .cpr-val{color:var(--terra)}
+.stamp{position:absolute;top:26px;z-index:10;padding:7px 18px;border-radius:4px;font-size:16px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;opacity:0;pointer-events:none;font-family:'DM Sans',sans-serif}
+.stamp-yes{left:14px;color:#1a6e40;border:2.5px solid #1a6e40;transform:rotate(-14deg);background:rgba(26,110,64,.07)}
+.stamp-no{right:14px;color:#8B3A1E;border:2.5px solid #8B3A1E;transform:rotate(14deg);background:rgba(139,58,30,.07)}
+.t-footer{position:absolute;bottom:0;left:0;right:0;z-index:20;display:flex;flex-direction:column;align-items:center;padding-bottom:max(env(safe-area-inset-bottom),28px);background:linear-gradient(to top,#E7E7E5 55%,rgba(231,231,229,0))}
+.action-row{display:flex;align-items:center;justify-content:center;gap:26px;margin-bottom:9px}
+.action-btn{border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .22s var(--spring);-webkit-tap-highlight-color:transparent}
+.action-btn:active{transform:scale(.84)!important}
+.btn-nope{width:60px;height:60px;font-size:22px;background:#FAFAF8;color:#8B3A1E;border:1.5px solid rgba(139,58,30,.2);box-shadow:0 2px 10px rgba(28,20,16,.08)}
+.btn-nope:hover{transform:scale(1.08) rotate(-8deg)}
+.btn-like{width:68px;height:68px;font-size:26px;background:var(--terra);color:#EFEFED;box-shadow:0 6px 20px rgba(139,58,30,.3)}
+.btn-like:hover{transform:scale(1.1)}
+.btn-undo{width:44px;height:44px;font-size:18px;background:#FAFAF8;color:var(--pedra);border:1.5px solid rgba(28,20,16,.12);box-shadow:0 2px 8px rgba(28,20,16,.06)}
+.btn-undo:hover{transform:scale(1.08) rotate(-12deg)}
+.t-feedback{position:absolute;top:84px;left:50%;transform:translateX(-50%) translateY(-6px);background:rgba(28,20,16,.88);backdrop-filter:blur(10px);color:var(--ambar);border-radius:4px;padding:8px 18px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;transition:all .3s var(--tr);pointer-events:none;z-index:30}
+.t-feedback.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ════ PWA / TOAST ════ */
+#pwa-banner{position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#FAFAF8;border-top:1px solid rgba(28,20,16,.1);padding:16px 20px max(env(safe-area-inset-bottom),16px);display:none;align-items:center;gap:14px;box-shadow:0 -4px 20px rgba(28,20,16,.08)}
+#pwa-banner.show{display:flex}
+.pwa-icon{width:44px;height:44px;border-radius:4px;flex-shrink:0}
+.pwa-text{flex:1}
+.pwa-text strong{display:block;font-size:14px;color:var(--creme);font-weight:600;margin-bottom:2px}
+.pwa-text span{font-size:12px;color:var(--pedra);line-height:1.4}
+.pwa-btn{background:var(--terra);color:#EFEFED;border:none;border-radius:4px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pwa-dismiss{background:none;border:none;color:var(--pedra);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;line-height:1}
+#toast{position:fixed;top:50px;left:50%;z-index:9999;transform:translateX(-50%) translateY(-14px);background:var(--creme);border-radius:4px;padding:10px 22px;font-size:13px;color:#EFEFED;opacity:0;pointer-events:none;white-space:nowrap;transition:all .38s var(--tr)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.shake{animation:shake .4s ease}
+.confetti-p{position:fixed;pointer-events:none;z-index:999;animation:cfFall linear forwards}
+@keyframes cfFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- TELA 1 — HOOK -->
+<div id="s-welcome" class="screen active">
+  <div class="grain"></div><div class="top-rule"></div><div class="orb-top"></div>
+  <div class="wlc-inner">
+    <div class="wordmark">
+      <span class="wm-f">Fredinho</span><div class="wm-sep"></div><span class="wm-w">Weissmann</span>
+    </div>
+    <div class="hook-body">
+      <span class="hook-line l1">Algumas experiências</span>
+      <span class="hook-line l2">não estão no cardápio.</span>
+      <span class="hook-line l3">Serão preparadas <em>para você.</em></span>
+      <span class="hook-sub">Leva menos de dois minutos.</span>
+    </div>
+    <div class="wlc-cta">
+      <button class="btn-p" onclick="go('s-howto')">Começar →</button>
+    </div>
+    <p class="wlc-source">Convidado por <strong id="restaurant-name">…</strong></p>
+  </div>
+</div>
+
+<!-- TELA 1b — COMO FUNCIONA -->
+<div id="s-howto" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.25"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
+    <div style="opacity:0;animation:fsu .6s .05s var(--tr) forwards">
+      <div style="font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px">Como funciona</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(30px,8vw,42px);font-weight:300;font-style:italic;line-height:1.15;color:var(--creme);margin-bottom:36px">Vamos mostrar<br><em style="font-style:normal;font-weight:600;color:var(--terra)">experiências.</em><br>Você reage.</h2>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;margin-bottom:44px;opacity:0;animation:fsu .6s .22s var(--tr) forwards">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:38px;height:38px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">♥</div>
+        <div><div style="font-size:14px;font-weight:600;color:var(--creme);margin-bottom:3px">Curtiu? Deslize para a direita</div><div style="font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300">Ou toque no coração. A experiência entra no seu perfil.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:38px;height:38px;border-radius:4px;background:rgba(28,20,16,.06);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">✕</div>
+        <div><div style="font-size:14px;font-weight:600;color:var(--creme);margin-bottom:3px">Não é para você? Deslize para a esquerda</div><div style="font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300">Tudo bem. Isso também nos diz muito sobre seu gosto.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:38px;height:38px;border-radius:4px;background:rgba(154,107,46,.1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">✦</div>
+        <div><div style="font-size:14px;font-weight:600;color:var(--creme);margin-bottom:3px">Seu perfil gastronômico emerge</div><div style="font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300">Cada reação revela o que você realmente quer. Sem formulário.</div></div>
+      </div>
+    </div>
+    <div style="opacity:0;animation:fsu .6s .42s var(--tr) forwards">
+      <button class="btn-p" onclick="go('s-name')">Entendi, vamos lá →</button>
+      <p style="font-size:11px;color:rgba(107,94,82,.5);text-align:center;margin-top:14px;font-weight:300">Aproximadamente 22 cards. Menos de 2 minutos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 2 — NOME -->
+<div id="s-name" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.3"></div>
+  <div class="name-inner">
+    <div class="name-eyebrow">Uma pergunta</div>
+    <h2 class="name-hl">Como prefere ser<br><em>chamado?</em></h2>
+    <div class="name-field-wrap">
+      <input class="name-input" id="f-name" type="text" placeholder="Seu nome…" autocomplete="given-name" autocorrect="off" spellcheck="false" oninput="onNameInput()">
+      <div class="name-underline"></div>
+    </div>
+    <div class="name-cta" id="name-cta">
+      <button class="btn-p" onclick="goSwipe()">Continuar, <span id="name-btn-preview">…</span> →</button>
+    </div>
+    <p class="name-skip" onclick="goSwipe(true)">Prefiro não dizer</p>
+  </div>
+</div>
+
+<!-- SWIPE -->
+<div id="s-tinder" class="screen">
+  <div class="t-header">
+    <div class="t-brand">
+      <svg class="t-face" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="40" fill="#8B3A1E"/>
+        <circle cx="37" cy="42" r="5" fill="#EFEFED"/><circle cx="63" cy="42" r="5" fill="#EFEFED"/>
+        <path d="M 34 60 Q 50 74 66 60" stroke="#EFEFED" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div>
+        <div class="t-name-lbl">Fredinho</div>
+        <div class="t-user-name" id="t-user-name"></div>
+      </div>
+      <span class="t-badge" id="t-badge">Calibrando</span>
+    </div>
+    <div class="t-prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="t-prog"></div></div>
+      <span class="prog-cnt" id="t-cnt"></span>
+    </div>
+  </div>
+  <div id="t-feedback" class="t-feedback"></div>
+  <div class="card-stack" id="card-stack"></div>
+  <div class="t-footer">
+    <div class="action-row">
+      <button class="action-btn btn-undo" id="btn-undo" onclick="undoLastSwipe()" style="opacity:0;pointer-events:none;transition:opacity .3s" title="Desfazer">↩</button>
+      <button class="action-btn btn-nope" onclick="swipeBtn('left')">✕</button>
+      <button class="action-btn btn-like" onclick="swipeBtn('right')">♥</button>
+    </div>
+  </div>
+</div>
+
+<!-- SURVEY -->
+<div id="s-survey" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.3"></div>
+  <div class="sv-inner">
+    <h2 class="sv-greeting" id="sv-greeting">—</h2>
+    <p class="sv-sub" id="sv-sub-sv">—</p>
+    <div id="sv-chips-wrap"></div>
+    <button class="btn-p" style="max-width:260px" id="sv-btn" onclick="surveyNext()">Continuar →</button>
+    <p class="sv-skip" onclick="surveySkip()">Pular</p>
+  </div>
+</div>
+
+<!-- TELEGRAM -->
+<div id="s-telegram" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Canal de avisos</div>
+    <h2 class="mcta-title">Quer ser avisado quando<br>surgir uma <em>mesa assim?</em></h2>
+    <p class="mcta-sub">Conecte o Telegram para receber seus convites antes de todo mundo. Só o que foi feito para você — sem spam.</p>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .3s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Conectar Telegram</strong>, você autoriza o Fredinho a enviar mensagens pelo bot <strong>@ListadoFredinho_bot</strong>. Você pode cancelar a qualquer momento digitando /sair no bot.</p>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" onclick="onTelegramClick()">Conectar Telegram →</button>
+      <div id="tg-status" style="display:none;font-size:12px;color:var(--pedra);text-align:center;padding:10px 0;line-height:1.65">✓ Abrindo o bot… Após tocar em <strong>Iniciar</strong>, seu Telegram estará vinculado ao seu perfil.</div>
+    </div>
+    <p class="mcta-skip" onclick="skipTelegram()">Agora não</p>
+  </div>
+</div>
+
+<!-- MICRO-CTA: BAIRRO MORA -->
+<div id="s-bairro-mora" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Contexto</div>
+    <h2 class="mcta-title">Onde você <em>mora?</em></h2>
+    <p class="mcta-sub" style="margin-bottom:32px">Ajuda a sugerir experiências perto de você.</p>
+    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+      <input class="name-input" id="f-bairro-mora" type="text" placeholder="Ex: Ipanema, Leblon, Tijuca…"
+        autocorrect="off" spellcheck="false" style="font-size:26px"
+        oninput="onBairroInput('mora')" onkeydown="if(event.key==='Enter')saveBairroMora()">
+      <div class="name-underline" id="ul-mora"></div>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="btn-mora" onclick="saveBairroMora()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Continuar →</button>
+    </div>
+    <p class="mcta-skip" onclick="go('s-bairro-trabalha')">Pular</p>
+  </div>
+</div>
+
+<!-- MICRO-CTA: BAIRRO TRABALHA -->
+<div id="s-bairro-trabalha" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Contexto</div>
+    <h2 class="mcta-title">Onde costuma <em>almoçar?</em></h2>
+    <p class="mcta-sub" style="margin-bottom:32px">Para sugestões no seu dia a dia — bairro ou região.</p>
+    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+      <input class="name-input" id="f-bairro-trabalha" type="text" placeholder="Ex: Centro, Botafogo, Barra…"
+        autocorrect="off" spellcheck="false" style="font-size:26px"
+        oninput="onBairroInput('trabalha')" onkeydown="if(event.key==='Enter')saveBairroTrabalha()">
+      <div class="name-underline" id="ul-trabalha"></div>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="btn-trabalha" onclick="saveBairroTrabalha()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Continuar →</button>
+    </div>
+    <p class="mcta-skip" onclick="afterBairros()">Pular</p>
+  </div>
+</div>
+
+<!-- PUSH: TELA EXPLICATIVA -->
+<div id="s-push" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
+    <div style="opacity:0;animation:fsu .6s .05s var(--tr) forwards;margin-bottom:6px">
+      <div class="mcta-eyebrow" style="animation:none;opacity:1">Notificações</div>
+    </div>
+    <h2 class="mcta-title">Receba mesmo com<br>o app <em>fechado</em></h2>
+    <p class="mcta-sub">Quando surgir algo feito para você, uma notificação chega direto no celular — sem precisar abrir nada.</p>
+
+    <!-- Android -->
+    <div id="push-android" style="margin-bottom:28px;display:none">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--pedra);font-weight:600;margin-bottom:14px">Android</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">1</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">Toque em <strong>Ativar notificações</strong> abaixo</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">2</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">O navegador vai pedir confirmação — toque em <strong>Permitir</strong></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">3</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">Pronto. Você receberá avisos mesmo com o app fechado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS -->
+    <div id="push-ios" style="margin-bottom:28px;display:none">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--pedra);font-weight:600;margin-bottom:14px">iPhone</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">1</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">No Safari, toque no botão <strong>Compartilhar</strong> (□↑) na barra inferior</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">2</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">Selecione <strong>Adicionar à Tela de Início</strong> e confirme</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:28px;height:28px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--terra);flex-shrink:0">3</div>
+          <div style="font-size:13px;color:var(--creme);line-height:1.55;padding-top:4px">Abra o Fredinho pelo ícone na tela inicial e toque em <strong>Ativar</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="opacity:0;animation:fsu .6s .45s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
+      <button class="btn-p" id="push-btn" onclick="requestPushFromCTA()">Ativar notificações →</button>
+      <p class="mcta-skip" style="opacity:1" onclick="go('s-whatsapp')">Agora não</p>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP — botão de abrir com opt-in explícito -->
+<div id="s-whatsapp" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Seus convites</div>
+    <h2 class="mcta-title">Receba pelo<br><em>WhatsApp</em></h2>
+    <p class="mcta-sub">Uma mensagem rápida para vincular seu número. A gente manda só o que foi feito para você — sem spam.</p>
+    <div class="mcta-actions">
+      <button class="btn-p" onclick="onWhatsAppClick()">Abrir WhatsApp →</button>
+    </div>
+    <p class="mcta-skip" onclick="go('s-phone')">Prefiro digitar o número</p>
+    <p class="mcta-skip" style="margin-top:4px;font-size:11px" onclick="afterWhatsAppSkip()">Agora não</p>
+  </div>
+</div>
+
+<!-- TELEFONE — WhatsApp opt-in via formulário (sem abrir o app) -->
+<div id="s-phone" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Último passo</div>
+    <h2 class="mcta-title">Quer convites<br>pelo <em>WhatsApp?</em></h2>
+    <p class="mcta-sub">Deixa o número aqui — a gente manda só o que foi feito para você. Sem spam.</p>
+    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+      <input class="name-input" id="f-phone" type="tel" inputmode="numeric" placeholder="(21) 99999-9999"
+        autocorrect="off" spellcheck="false" style="font-size:26px"
+        oninput="onPhoneInput()" onkeydown="if(event.key==='Enter')savePhone()">
+      <div class="name-underline" id="ul-phone"></div>
+    </div>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .38s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao confirmar, você autoriza o Fredinho a enviar convites personalizados pelo WhatsApp. Cancele a qualquer momento respondendo <strong>SAIR</strong>.</p>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="phone-btn" onclick="savePhone()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Confirmar →</button>
+    </div>
+    <p class="mcta-skip" onclick="afterPhoneSkip()">Agora não</p>
+  </div>
+</div>
+
+<!-- EMAIL — canal de fallback e registro -->
+<div id="s-email" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
+  <div class="mcta-inner">
+    <div class="mcta-eyebrow">Canal de avisos</div>
+    <h2 class="mcta-title">Por onde te<br><em>encontramos?</em></h2>
+    <p class="mcta-sub">Quando surgir algo feito para você, enviamos por aqui. Poucos e-mails, sempre com algo que vale a atenção.</p>
+    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+      <input class="email-input" id="f-email" type="email" inputmode="email" placeholder="seu@email.com"
+        autocorrect="off" autocapitalize="none" spellcheck="false"
+        oninput="onEmailInput()" onkeydown="if(event.key==='Enter')saveEmail()">
+      <div class="email-underline" id="ul-email"></div>
+    </div>
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .38s var(--tr) forwards">
+      <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Confirmar</strong>, você autoriza o Fredinho a enviar convites personalizados para este endereço. Você pode cancelar a qualquer momento respondendo ao e-mail com <strong>SAIR</strong>.</p>
+    </div>
+    <div class="mcta-actions">
+      <button class="btn-p" id="email-btn" onclick="saveEmail()" style="opacity:.4;pointer-events:none;transition:opacity .3s">Confirmar →</button>
+    </div>
+    <p class="mcta-skip" onclick="skipEmail()">Agora não</p>
+  </div>
+</div>
+
+<!-- CELEBRAÇÃO -->
+<div id="s-final" class="screen">
+  <div class="grain"></div><div class="orb-top" style="opacity:.15"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
+    <div style="opacity:0;animation:fsu .6s .1s var(--tr) forwards;margin-bottom:32px">
+      <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pedra);margin-bottom:6px">Weissmann, acesso nº</div>
+      <div id="final-member-num" style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--ambar);letter-spacing:4px;line-height:1">—</div>
+    </div>
+    <div style="opacity:0;animation:fsu .6s .32s var(--tr) forwards;margin-bottom:40px">
+      <div id="final-headline" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7.5vw,38px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme)">Seu perfil está pronto.</div>
+      <div style="font-size:14px;color:var(--pedra);margin-top:10px;line-height:1.65;font-weight:300">Os próximos convites chegarão quando a experiência encaixar exatamente no que você gosta.</div>
+    </div>
+    <div style="opacity:0;animation:fsu .6s .52s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
+      <div style="background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="shareWithFriend()">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--creme);margin-bottom:5px">Compartilhar com um amigo</div>
+        <div style="font-size:12px;color:var(--pedra);line-height:1.6;margin-bottom:12px">Queremos conhecer melhor seus amigos para criar oportunidades cada vez melhores.</div>
+        <div style="font-size:12px;font-weight:600;color:var(--terra)">Convidar →</div>
+      </div>
+      <div style="background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="shareWithRestaurant()">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--creme);margin-bottom:5px">Compartilhar com um restaurante</div>
+        <div style="font-size:12px;color:var(--pedra);line-height:1.6;margin-bottom:12px">Muitos restaurantes sonham em criar experiências personalizadas para você.</div>
+        <div style="font-size:12px;font-weight:600;color:var(--terra)">Apresentar meu perfil →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BANNER PWA -->
+<div id="pwa-banner">
+  <img class="pwa-icon" src="icons/icon-192.png" alt="Fredinho">
+  <div class="pwa-text">
+    <strong id="pwa-banner-title">Salva o Fredinho no celular</strong>
+    <span id="pwa-banner-sub">Receba quando tiver algo feito para você — mesmo com o app fechado</span>
+  </div>
+  <button class="pwa-btn" id="pwa-btn-main" onclick="pwaInstall()">Instalar</button>
+  <button class="pwa-dismiss" onclick="pwaDismiss()">×</button>
+</div>
+<div id="toast"></div>
+
+<!-- MODAL iOS -->
+<div id="ios-install-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(28,20,16,.55);align-items:flex-end;justify-content:center">
+  <div style="background:#FAFAF8;border-radius:4px 4px 0 0;padding:28px 28px max(env(safe-area-inset-bottom),28px);width:100%;max-width:480px;animation:fsu .35s var(--tr)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;font-style:italic;color:var(--creme);margin-bottom:8px">Para receber no iPhone</div>
+    <div style="font-size:13px;color:var(--pedra);line-height:1.7;margin-bottom:20px">As notificações push no iPhone funcionam quando o Fredinho está salvo na sua tela inicial.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0">1</div><div style="font-size:13px;color:var(--creme)">Toque em <strong>Compartilhar</strong> na barra do Safari (□↑)</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0">2</div><div style="font-size:13px;color:var(--creme)">Selecione <strong>Adicionar à Tela de Início</strong></div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="width:32px;height:32px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0">3</div><div style="font-size:13px;color:var(--creme)">Abra o Fredinho pela tela inicial e aceite as notificações</div></div>
+    </div>
+    <button class="btn-p" onclick="document.getElementById('ios-install-modal').style.display='none'">Entendi</button>
+    <p style="font-size:11px;color:var(--pedra);text-align:center;margin-top:12px;cursor:pointer" onclick="document.getElementById('ios-install-modal').style.display='none'">Agora não</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const SB_URL='https://jebhatmtzhoxoklfxzgh.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q';
+const SB_H={'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json'};
+const VAPID_PUBLIC_KEY='p2KKuRQi-X2Dw1WGPm2O9Zic9WXayy8wEP5Gmjfw0Cn4DjajFFf_kxz95axl16wz4NufaT20K3hZsxmj-WwkWw';
+const BOT_USERNAME='ListadoFredinho_bot';
+const FREDINHO_WA='5521967227832';
+
+// ═══════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════
+let user={
+  name:'',neighborhood_home:'',neighborhood_work:'',
+  alimentacao:'',dieta:[],vegano:false,
+  contextos:[],filhos:[],alergias:[],alergia_grave:false,
+  familia:[],saude:['nenhuma'],tier:'',
+  source_restaurant:'',source_restaurant_id:null,convite_ref:'',utm_source:'',member_number:'',user_id:null,
+  email:'',email_confirmed:false,
+  telegram_connected:false,whatsapp_sent:false,
+};
+let liked=[],disliked=[],axisScores={foodie:0,classico:0,sustentavel:0,social:0,exclusivo:0,bohemio:0};
+let tierScore=0,consecutiveLikes=0;
+let anchorPhase=true,anchorCardIdx=0,anchorsDone=false;
+let activeCard=null,startX=0,currentX=0,isDragging=false,swipeLocked=false;
+let surveySels={},currentSurveyId='';
+let activeDeck=[],deckQueue=[],deckPos=0,deckResults={};
+let undoSnapshot=null;
+let ANCHORS=[],DECK_AAA=[],DECK_MID=[],experiencesLoaded=false;
+const KUDOS=['✨ Bom gosto…','🌟 Isso diz muito','⭐ Paladar refinado','✦ Estilo inconfundível','🎯 Revelador','💎 Só você escolheria isso'];
+const BAIRROS_MORA=['Zona Sul','Barra / Recreio','Zona Norte','Zona Oeste','Centro / Lapa','Niterói / GR','Outro estado','Home office'];
+const BAIRROS_TRABALHA=['Zona Sul','Barra / Recreio','Zona Norte','Zona Oeste','Centro / Lapa','Niterói / GR','Em casa','Varia muito'];
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(function(){
+  const p=new URLSearchParams(window.location.search);
+  user.source_restaurant=p.get('r')||'';
+  user.utm_source=p.get('utm_source')||'';
+
+  // Suporte ao novo formato ?src=<rid>&ref=<slug> (gerado pelo ConviteLink)
+  const srcParam=p.get('src')||null;
+  const refParam=p.get('ref')||'';
+  if(srcParam){
+    user.source_restaurant_id=srcParam;
+    user.convite_ref=refParam;
+    sessionStorage.setItem('convite_src',srcParam);
+    sessionStorage.setItem('convite_ref',refParam);
+  } else {
+    // Recupera do sessionStorage (sobrevive a redirects)
+    user.source_restaurant_id=sessionStorage.getItem('convite_src')||null;
+    user.convite_ref=sessionStorage.getItem('convite_ref')||'';
+  }
+
+  // Resolve nome do restaurante
+  if(user.source_restaurant_id){
+    // Veio por ?src= — busca pelo id (uuid)
+    fetch(`${SB_URL}/rest/v1/restaurants?id=eq.${user.source_restaurant_id}&select=name,slug`,{headers:SB_H})
+      .then(r=>r.json()).then(d=>{
+        if(d[0]){
+          document.getElementById('restaurant-name').textContent=d[0].name||'um amigo especial';
+          if(d[0].slug) user.source_restaurant=d[0].slug;
+        }
+      }).catch(()=>{document.getElementById('restaurant-name').textContent='um amigo especial';});
+  } else if(user.source_restaurant){
+    // Compatibilidade: veio por ?r= — busca pelo slug e captura o id
+    fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=name,id`,{headers:SB_H})
+      .then(r=>r.json()).then(d=>{
+        document.getElementById('restaurant-name').textContent=d[0]?.name||'um amigo especial';
+        if(d[0]?.id) user.source_restaurant_id=d[0].id;
+      }).catch(()=>{document.getElementById('restaurant-name').textContent='um amigo especial';});
+  } else {
+    document.getElementById('restaurant-name').textContent='um amigo especial';
+  }
+
+  // Registra acesso via link (silencioso, não bloqueia)
+  if(user.source_restaurant_id){
+    fetch(`${SB_URL}/rest/v1/convite_events`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        restaurant_id:user.source_restaurant_id,
+        ref_slug:user.convite_ref||null,
+        tipo:'acesso_link',
+        abriu:true,
+        enviado_em:new Date().toISOString(),
+      })
+    }).catch(()=>{});
+  }
+
+  fetchExperiences();
+})();
+
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandaloneMode=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+let swRegistration=null;
+if('serviceWorker' in navigator){
+  window.addEventListener('load',async()=>{
+    try{swRegistration=await navigator.serviceWorker.register('/sw.js',{scope:'/'});}
+    catch(e){console.warn('[SW] falhou:',e);}
+  });
+}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  setTimeout(()=>{if(document.getElementById('s-welcome').classList.contains('active'))document.getElementById('pwa-banner').classList.add('show');},3000);
+});
+function pwaInstall(){
+  if(isIOS&&!isInStandaloneMode){document.getElementById('pwa-banner-title').textContent='Para instalar no iPhone';document.getElementById('pwa-banner-sub').textContent='Toque em Compartilhar (□↑) e depois "Adicionar à Tela de Início"';document.getElementById('pwa-btn-main').style.display='none';return;}
+  document.getElementById('pwa-banner').classList.remove('show');
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted')toast('Fredinho instalado!');deferredPrompt=null;});}
+}
+function pwaDismiss(){document.getElementById('pwa-banner').classList.remove('show');}
+
+// ═══════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    if(s.id===id){s.classList.remove('exit');s.classList.add('active');}
+    else{s.classList.remove('active');s.classList.add('exit');setTimeout(()=>s.classList.remove('exit'),550);}
+  });
+}
+
+// ═══════════════════════════════════════════════
+// NOME
+// ═══════════════════════════════════════════════
+function onNameInput(){
+  const v=document.getElementById('f-name').value.trim();
+  document.getElementById('name-btn-preview').textContent=v.split(' ')[0]||'…';
+  document.getElementById('name-cta').classList.toggle('show',v.length>0);
+}
+
+// ═══════════════════════════════════════════════
+// EXPERIENCES
+// ═══════════════════════════════════════════════
+function urlB64ToUint8Array(b){
+  const p='='.repeat((4-b.length%4)%4);
+  const s=(b+p).replace(/-/g,'+').replace(/_/g,'/');
+  const r=atob(s);return new Uint8Array([...r].map(c=>c.charCodeAt(0)));
+}
+function rowToCard(r){
+  return{id:r.id,eixo:r.eixo,pair:r.pair,needsLike:r.needs_like||undefined,anchor:r.deck==='anchor',
+    cat:r.cat,name:r.name,desc:r.description,dur:r.duration,price:r.price,tier_max:r.tier_max,
+    scores:{foodie:r.score_foodie||0,classico:r.score_classico||0,sustentavel:r.score_sustentavel||0,
+      social:r.score_social||0,exclusivo:r.score_exclusivo||0,bohemio:r.score_bohemio||0},
+    photo_unsplash:r.photo_unsplash};
+}
+async function fetchExperiences(){
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/experiences?active=eq.true&order=sort_order.asc`,{headers:SB_H});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const rows=await res.json();
+    ANCHORS=rows.filter(r=>r.deck==='anchor').map(rowToCard);
+    DECK_AAA=rows.filter(r=>r.deck==='aaa').map(rowToCard);
+    DECK_MID=rows.filter(r=>r.deck==='mid').map(rowToCard);
+    experiencesLoaded=true;
+  }catch(e){console.warn('[Fredinho] Supabase indisponível, usando fallback',e);loadFallbackExperiences();}
+}
+function loadFallbackExperiences(){
+  ANCHORS=[
+    {id:100,anchor:true,cat:'RESERVA PRIORITÁRIA',name:'A Melhor Mesa. Sexta-feira, 21h.',desc:'Você escolhe o dia, o horário e a mesa — sem lista de espera. Isso tem um preço. Para quem valoriza essa conveniência, cada detalhe já está resolvido antes de você chegar.',dur:'Horário nobre',price:'R$ 690 / pessoa',tier_max:690,scores:{},photo_unsplash:'E4944K_4SvI'},
+    {id:101,anchor:true,cat:'OPORTUNIDADE DO CHEF',name:'Terça-feira à noite. Preço de insider.',desc:'Num dia de baixo movimento, o chef oferece entrada, principal e sobremesa por um preço que nunca aparece no cardápio. Quem aceita ir numa terça ganha o melhor da casa.',dur:'1h30',price:'R$ 89 / pessoa',tier_max:89,scores:{},photo_unsplash:'08bOYnH_r_E'},
+  ];
+  DECK_AAA=[
+    {id:'A1',eixo:'A',pair:1,cat:'FOODIE',name:'Sushi Omakase Tradicional',desc:'O chef seleciona os melhores cortes do dia: peixes brancos e gordos, servidos peça a peça com arroz em temperatura de corpo.',dur:'90–120 min',price:'R$ 290 / pessoa',tier_max:290,scores:{foodie:2,exclusivo:1},photo_unsplash:'pGM4sjt_BdQ'},
+    {id:'B1',eixo:'B',pair:1,cat:'CLÁSSICO',name:'Entrecôte e Allumettes',desc:'Corte bovino premium selado na brasa, batatas fósforo crocantes e salada de folhas ao Dijon.',dur:'60–90 min',price:'R$ 128 / pessoa',tier_max:128,scores:{classico:2},photo_unsplash:'SVoCPnCMpV0'},
+    {id:'C1',eixo:'C',pair:1,cat:'SUSTENTÁVEL',name:'Menu de Colheita Orgânica Sazonal',desc:'Vegetais de época, queijos artesanais de pequenos produtores e foco no frescor do ingrediente vivo.',dur:'60–80 min',price:'R$ 135 / pessoa',tier_max:135,scores:{sustentavel:2},photo_unsplash:'9aOswReDKPo'},
+    {id:'D1',eixo:'D',pair:1,cat:'SOCIAL',name:'Reserva Prioritária. Mesa de Janela',desc:'A melhor mesa da casa no sábado às 20h30. Sem fila, recepção personalizada e concierge desde a chegada.',dur:'60–120 min',price:'R$ 180 (crédito)',tier_max:180,scores:{social:2,exclusivo:1},photo_unsplash:'oqStZgtoPGU'},
+    {id:'E1',eixo:'E',pair:1,cat:'EXCLUSIVO',name:'Degustação de Trufas Negras Frescas',desc:'Massa artesanal ou risoto finalizados à mesa com lâminas generosas de trufas negras frescas.',dur:'90 min',price:'R$ 360 / pessoa',tier_max:360,scores:{exclusivo:2},photo_unsplash:'YqdO8HiuKjw'},
+    {id:'F1',eixo:'F',pair:1,cat:'BOÊMIO',name:'Izakaya Contemporâneo com Saquês Premium',desc:'Petiscos japoneses de alta técnica em balcão animado, harmonizados com saquês de pequenos produtores.',dur:'60–90 min',price:'R$ 180 / pessoa',tier_max:180,scores:{bohemio:2},photo_unsplash:'LVw7M0l0-SE'},
+  ];
+  DECK_MID=[
+    {id:'MA1',eixo:'A',pair:1,cat:'FOODIE',name:'Festival de Ceviches e Tiraditos',desc:'Peixes frescos marinados com diferentes leites de tigre e acompanhamentos crocantes.',dur:'50–70 min',price:'R$ 89 / pessoa',tier_max:89,scores:{foodie:2},photo_unsplash:'pGM4sjt_BdQ'},
+    {id:'MB1',eixo:'B',pair:1,cat:'CLÁSSICO',name:'Milanesa de Filet com Risoto de Limão Siciliano',desc:'Carne crocante por fora e suculenta por dentro, com risoto cremoso e refrescante.',dur:'45–60 min',price:'R$ 78 / pessoa',tier_max:78,scores:{classico:2},photo_unsplash:'SVoCPnCMpV0'},
+    {id:'MC1',eixo:'C',pair:1,cat:'SAUDÁVEL',name:'Bowl de Grãos com Proteína na Brasa',desc:'Quinoa, vegetais tostados e proteína preparada no fogo.',dur:'40–50 min',price:'R$ 65 / pessoa',tier_max:65,scores:{sustentavel:2},photo_unsplash:'9aOswReDKPo'},
+    {id:'MD1',eixo:'D',pair:1,cat:'SOCIAL',name:'Combo Gastrobar: Petiscos e Chopp Duplo',desc:'Croquetes artesanais ou tábua de antepastos com bebidas em dose dupla até as 20h.',dur:'60–120 min',price:'R$ 85 / pessoa',tier_max:85,scores:{social:2},photo_unsplash:'oqStZgtoPGU'},
+    {id:'ME1',eixo:'E',pair:1,cat:'EXPERIÊNCIA',name:'Noite de Fondues ou Raclettes',desc:'Interatividade à mesa. O prazer de preparar o próprio bocado em ambiente acolhedor.',dur:'90–120 min',price:'R$ 130 / pessoa',tier_max:130,scores:{exclusivo:2},photo_unsplash:'YqdO8HiuKjw'},
+    {id:'MF1',eixo:'F',pair:1,cat:'BOÊMIO',name:'PF de Luxo. Menu Executivo Especial',desc:'Arroz, feijão caprichado, farofa crocante e carne de primeira. O trivial elevado.',dur:'30–50 min',price:'R$ 58 / pessoa',tier_max:58,scores:{bohemio:2},photo_unsplash:'LVw7M0l0-SE'},
+  ];
+  experiencesLoaded=true;
+}
+
+// ═══════════════════════════════════════════════
+// ARQUÉTIPOS
+// ═══════════════════════════════════════════════
+const ARCH={
+  habitue:{ring:'#B85C38'},jetset:{ring:'#D4A053'},foodie:{ring:'#B85C38'},
+  atletaurbano:{ring:'#3daa6d'},bohemio:{ring:'#B85C38'},executivo:{ring:'#8888cc'},
+  consciente:{ring:'#3daa6d'},bonvivant:{ring:'#D4A053'},conectorsocial:{ring:'#6d3daa'},
+};
+function calcArchetype(){
+  const top=Object.entries(axisScores).sort((a,b)=>b[1]-a[1]);
+  const m={foodie:'foodie',classico:'bonvivant',sustentavel:'consciente',social:'conectorsocial',exclusivo:'jetset',bohemio:'bohemio'};
+  return{primary:m[top[0]?.[0]]||'habitue',secondary:m[top[1]?.[0]]||null,scores:axisScores,tier:getTier()};
+}
+function getTier(){if(tierScore>=4)return 'aaa';if(tierScore>=1)return 'mid';return 'valor';}
+function updateTierScore(card,dir){
+  const max=card.tier_max||0;
+  if(dir==='right'){if(max>=400)tierScore+=4;else if(max>=150)tierScore+=2;else tierScore+=1;consecutiveLikes++;}
+  else{if(max>=400)tierScore-=3;else if(max>=150)tierScore-=1;consecutiveLikes=0;}
+}
+
+// ═══════════════════════════════════════════════
+// SURVEYS
+// ═══════════════════════════════════════════════
+const SURVEYS=[
+  {id:'contexto',greeting:(n)=>`${n?n+', com':' Com'} quem você costuma sair?`,sub:'Pode marcar quantos quiser.',type:'chips',multi:true,chips:[{val:'casal',ico:'👫',label:'Casal'},{val:'amigos',ico:'👥',label:'Amigos'},{val:'negocios',ico:'💼',label:'Negócios'},{val:'familia',ico:'👨‍👩‍👧',label:'Família'},{val:'solo',ico:'🎭',label:'Solo'}]},
+  {id:'filhos',greeting:()=>'Qual a faixa de idade?',sub:'Faz muita diferença na escolha do lugar.',type:'chips',multi:true,chips:[{val:'bebe',ico:'👶',label:'Bebê, 0 a 3 anos'},{val:'criancas',ico:'🧒',label:'Crianças, 4 a 12'},{val:'teens',ico:'🧑',label:'Adolescentes'}]},
+  {id:'alimentacao',greeting:(n)=>`${n?n+', o':' O'} que define um bom jantar para você?`,sub:'Pode marcar os dois. Não se excluem.',type:'chips',multi:true,chips:[{val:'gostoso',ico:'',label:'O prazer do sabor e o rigor da técnica'},{val:'saudavel',ico:'',label:'Pratos leves, ingredientes saudáveis'}]},
+  {id:'dieta',greeting:()=>'Como você come?',sub:'Marque o que faz parte da sua rotina.',type:'chips2',multi:true,chips:[{val:'lowcarb',ico:'🥩',label:'Low carb / Keto'},{val:'vegano',ico:'🌱',label:'Vegano'},{val:'plantforward',ico:'🥦',label:'Prefiro vegetais'},{val:'diabetico',ico:'🩺',label:'Diabético'},{val:'semgluten',ico:'🌾',label:'Sem glúten'},{val:'sustentavel',ico:'🌍',label:'Orgânicos'},{val:'sem_restricao',ico:'✓',label:'Sem restrição'}]},
+  {id:'alergia_yn',greeting:()=>'Você tem alergia alimentar grave?',sub:'Para nunca te mandar o que pode te fazer mal.',type:'chips',multi:false,chips:[{val:'nao',ico:'✓',label:'Não tenho alergia grave'},{val:'sim',ico:'⚠️',label:'Sim, tenho alergia grave'}]},
+  {id:'alergia_det',greeting:()=>'Quais alergias?',sub:'Ficam separadas e protegidas.',type:'chips2',multi:true,chips:[{val:'amendoim',ico:'🥜',label:'Amendoim'},{val:'frutos_mar',ico:'🦐',label:'Frutos do mar'},{val:'laticinios',ico:'🥛',label:'Laticínios'},{val:'ovos',ico:'🥚',label:'Ovos'},{val:'gluten',ico:'🌾',label:'Glúten'},{val:'peixes',ico:'🐟',label:'Peixes'},{val:'soja',ico:'🫘',label:'Soja'},{val:'outras',ico:'➕',label:'Outras'}]},
+];
+function showSurveyById(svId){
+  const sv=SURVEYS.find(s=>s.id===svId);if(!sv)return;
+  currentSurveyId=svId;surveySels={vals:[]};
+  const fn=user.name?user.name.split(' ')[0]:'';
+  document.getElementById('sv-greeting').innerHTML=sv.greeting(fn);
+  document.getElementById('sv-sub-sv').textContent=sv.sub;
+  const wrap=document.getElementById('sv-chips-wrap');wrap.innerHTML='';
+  const isGrid=sv.type==='chips2';
+  const container=document.createElement('div');container.className=isGrid?'sv-chips-2':'sv-chips';
+  sv.chips.forEach(c=>{
+    const el=document.createElement('div');el.className=isGrid?'sv-chip-2':'sv-chip';
+    el.dataset.val=c.val;
+    el.innerHTML=`${c.ico?'<span style="margin-right:6px">'+c.ico+'</span>':''}${c.label}`;
+    el.onclick=()=>toggleChipNew(el,sv);container.appendChild(el);
+  });
+  wrap.appendChild(container);go('s-survey');
+}
+function toggleChipNew(el,sv){
+  if(!sv.multi){el.parentElement.querySelectorAll('[class*="sv-chip"]').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');surveySels.vals=[el.dataset.val];}
+  else{el.classList.toggle('sel');surveySels.vals=[...el.parentElement.querySelectorAll('.sel')].map(c=>c.dataset.val);}
+}
+function surveyNext(){
+  const vals=surveySels.vals||[];const svId=currentSurveyId;
+  if(svId==='contexto'){user.contextos=vals;user.familia=vals;if(vals.includes('familia'))showSurveyById('filhos');else afterContextoFlow();}
+  else if(svId==='filhos'){user.filhos=vals;afterContextoFlow();}
+  else if(svId==='alimentacao'){user.alimentacao=vals.length===2?'ambos':vals[0]||'gostoso';if(vals.includes('saudavel'))showSurveyById('dieta');else afterAlimentacaoFlow();}
+  else if(svId==='dieta'){user.dieta=vals;user.vegano=vals.includes('vegano');if(!vals.includes('sem_restricao')&&vals.length>0)showSurveyById('alergia_yn');else afterAlimentacaoFlow();}
+  else if(svId==='alergia_yn'){if(vals[0]==='sim'){user.alergia_grave=true;showSurveyById('alergia_det');}else{user.alergia_grave=false;afterAlimentacaoFlow();}}
+  else if(svId==='alergia_det'){user.alergias=vals;afterAlimentacaoFlow();}
+}
+function surveySkip(){
+  const svId=currentSurveyId;
+  if(svId==='contexto'||svId==='filhos')afterContextoFlow();else afterAlimentacaoFlow();
+}
+
+// ═══════════════════════════════════════════════
+// DECK ENGINE
+// ═══════════════════════════════════════════════
+function buildDeck(){
+  const isAAA=getTier()==='aaa';const base=isAAA?DECK_AAA:DECK_MID;
+  const querSaudavel=user.alimentacao==='saudavel'||user.alimentacao==='ambos';
+  activeDeck=base.filter(c=>{
+    if(c.eixo==='D') return false; // Social fora — não soma para os arquétipos principais
+    if(c.eixo==='C'&&!isAAA)return querSaudavel;
+    return true;
+  });
+  deckQueue=activeDeck.filter(c=>c.pair===1).map(c=>c.id);
+  deckPos=0;deckResults={};axisScores={foodie:0,classico:0,sustentavel:0,social:0,exclusivo:0,bohemio:0};
+}
+function currentDeckCard(){if(deckPos>=deckQueue.length)return null;return activeDeck.find(c=>c.id===deckQueue[deckPos])||null;}
+function registerSwipe(cardId,dir){
+  deckResults[cardId]=dir;const card=activeDeck.find(c=>c.id===cardId);if(!card)return;
+  if(dir==='right'&&card.scores)Object.entries(card.scores).forEach(([k,v])=>axisScores[k]=(axisScores[k]||0)+v);
+  // Segundo card de cada categoria removido — apenas pair:1 é exibido
+  deckPos++;
+}
+function buildCards(){
+  const stack=document.getElementById('card-stack');stack.innerHTML='';activeCard=null;swipeLocked=false;
+  const card=currentDeckCard();if(card){const c=makeCard(card);setPos(c,0,false);stack.appendChild(c);}
+  bindTop();updateProgress();
+}
+function promoteCards(){
+  const stack=document.getElementById('card-stack');
+  const rem=[...stack.querySelectorAll('.swipe-card')];rem.forEach((c,i)=>setPos(c,i,true));
+  if(rem.length===0){const next=currentDeckCard();if(next){const nc=makeCard(next);setPos(nc,0,false);stack.appendChild(nc);}}
+  setTimeout(()=>{swipeLocked=false;bindTop();},350);
+}
+
+// ═══════════════════════════════════════════════
+// FLUXO PRINCIPAL
+// ═══════════════════════════════════════════════
+async function goSwipe(skip=false){
+  user.name=skip?'':document.getElementById('f-name').value.trim();
+  document.getElementById('t-user-name').textContent=user.name?user.name.split(' ')[0]:'';
+  saveInitial(); // fire-and-forget
+  if(!experiencesLoaded){toast('Carregando…');await fetchExperiences();}
+  anchorsDone=false;anchorPhase=true;anchorCardIdx=0;tierScore=0;consecutiveLikes=0;
+  const stack=document.getElementById('card-stack');
+  stack.innerHTML='';activeCard=null;swipeLocked=false;
+  document.getElementById('t-badge').textContent='';
+  document.getElementById('t-prog').style.width='0%';
+  document.getElementById('t-cnt').textContent='';
+  if(ANCHORS.length>1){const back=makeCard(ANCHORS[1]);setPos(back,1,false);stack.appendChild(back);}
+  const top=makeCard(ANCHORS[0]);setPos(top,0,false);stack.appendChild(top);
+  bindTop();go('s-tinder');
+}
+function afterAnchors(){anchorsDone=true;anchorPhase=false;showSurveyById('contexto');}
+function afterContextoFlow(){showSurveyById('alimentacao');}
+function afterAlimentacaoFlow(){buildDeck();buildCards();go('s-tinder');}
+
+// ═══════════════════════════════════════════════
+// UNDO — desfaz o último swipe (um passo)
+// ═══════════════════════════════════════════════
+function snapshotForUndo(){
+  undoSnapshot={
+    liked:[...liked],disliked:[...disliked],
+    axisScores:{...axisScores},tierScore,consecutiveLikes,
+    deckPos,deckQueue:[...deckQueue],deckResults:{...deckResults},
+    anchorPhase,anchorCardIdx,
+  };
+  const btn=document.getElementById('btn-undo');
+  if(btn){btn.style.opacity='1';btn.style.pointerEvents='all';}
+}
+function undoLastSwipe(){
+  if(!undoSnapshot||swipeLocked)return;
+  const snap=undoSnapshot;undoSnapshot=null;
+  const btn=document.getElementById('btn-undo');
+  if(btn){btn.style.opacity='0';btn.style.pointerEvents='none';}
+  // Restaura estado
+  liked=snap.liked;disliked=snap.disliked;
+  axisScores={...snap.axisScores};tierScore=snap.tierScore;consecutiveLikes=snap.consecutiveLikes;
+  deckPos=snap.deckPos;deckQueue=[...snap.deckQueue];deckResults={...snap.deckResults};
+  anchorPhase=snap.anchorPhase;anchorCardIdx=snap.anchorCardIdx;
+  // Reconstrói o card na tela
+  const stack=document.getElementById('card-stack');
+  stack.innerHTML='';activeCard=null;swipeLocked=false;
+  if(snap.anchorPhase){
+    const next=ANCHORS[snap.anchorCardIdx+1];
+    if(next){const nb=makeCard(next);setPos(nb,1,false);stack.appendChild(nb);}
+    const cur=ANCHORS[snap.anchorCardIdx];
+    if(cur){const nc=makeCard(cur);setPos(nc,0,false);stack.appendChild(nc);}
+  }else{buildCards();}
+  bindTop();updateProgress();
+}
+
+function doSwipe(dir){
+  if(swipeLocked)return;
+  snapshotForUndo();swipeLocked=true;
+  const card=activeCard;activeCard=null;
+  document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onEnd);
+  const flyX=dir==='right'?window.innerWidth*1.6:-window.innerWidth*1.6;
+  card.style.transition='transform .46s var(--tr),opacity .36s ease';
+  card.style.transform=`translateX(${flyX}px) rotate(${dir==='right'?30:-30}deg)`;
+  card.style.opacity='0';card.style.zIndex='10';
+  if(anchorPhase){
+    const exp=ANCHORS[anchorCardIdx];updateTierScore(exp,dir);
+    if(dir==='right'){liked.push(exp);showFeedback(KUDOS[Math.floor(Math.random()*KUDOS.length)]);}
+    else disliked.push(exp);
+    anchorCardIdx++;
+    setTimeout(()=>{
+      card.remove();
+      if(anchorCardIdx>=ANCHORS.length){swipeLocked=false;afterAnchors();}
+      else{const stack=document.getElementById('card-stack');const nc=makeCard(ANCHORS[anchorCardIdx]);setPos(nc,0,false);stack.appendChild(nc);swipeLocked=false;bindTop();}
+    },490);return;
+  }
+  const cur=currentDeckCard();
+  if(!cur){swipeLocked=false;goToFinal();return;}
+  if(dir==='right'){liked.push(cur);showFeedback(KUDOS[Math.floor(Math.random()*KUDOS.length)]);}
+  else disliked.push(cur);
+  registerSwipe(cur.id,dir);updateTierScore(cur,dir);updateProgress();
+  setTimeout(()=>{card.remove();if(!currentDeckCard()){swipeLocked=false;goToFinal();return;}promoteCards();},490);
+}
+
+async function goToFinal(){
+  saveProgress(true); // fire-and-forget
+  updateTelegramLink();
+  // Registra conversão se veio por link rastreado
+  if(user.source_restaurant_id&&user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/convite_events`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        restaurant_id:user.source_restaurant_id,
+        ref_slug:user.convite_ref||null,
+        tipo:'cadastro_concluido',
+        user_id:user.user_id,
+        converteu:true,
+        converteu_em:new Date().toISOString(),
+      })
+    }).catch(()=>{});
+    sessionStorage.removeItem('convite_src');
+    sessionStorage.removeItem('convite_ref');
+  }
+  go('s-email');
+}
+
+function updateTelegramLink(){
+  // guarda o link internamente — não precisa mais de <a> com href
+  const num=user.member_number||user.user_id||'new';
+  // Inclui o primeiro nome (sem acentos) no startParam para o bot usar na saudação
+  const fn=user.name
+    ?user.name.split(' ')[0].normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]/g,'')
+    :'';
+  const startParam=fn?`${num}-${fn}`:num;
+  window._tgLink=`https://t.me/${BOT_USERNAME}?start=${startParam}`;
+}
+function onTelegramClick(){
+  updateTelegramLink();
+  window.open(window._tgLink,'_blank');
+  document.getElementById('tg-status').style.display='block';
+  const now=new Date().toISOString();
+  const consentText='Usuário clicou em Conectar Telegram e abriu @ListadoFredinho_bot com parâmetro start='+user.member_number;
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({telegram_pending:true,telegram_start_param:user.member_number,telegram_consent_at:now})
+    }).catch(()=>{});
+    saveConsent('telegram',consentText,'clicked_connect_telegram');
+  }
+  user.telegram_connected=true;
+  setTimeout(()=>go('s-bairro-mora'),2000);
+}
+function skipTelegram(){go('s-bairro-mora');}
+
+// ═══════════════════════════════════════════════
+// BAIRROS — texto livre
+// ═══════════════════════════════════════════════
+function onBairroInput(tipo){
+  const val=document.getElementById('f-bairro-'+tipo).value.trim();
+  const btn=document.getElementById('btn-'+tipo);
+  const ul=document.getElementById('ul-'+tipo);
+  if(btn){btn.style.opacity=val?'1':'0.4';btn.style.pointerEvents=val?'all':'none';}
+  if(ul)ul.style.transform=val?'scaleX(1)':'scaleX(0)';
+}
+function saveBairroMora(){
+  const val=document.getElementById('f-bairro-mora').value.trim();
+  if(val){
+    user.neighborhood_home=val;
+    // Persiste imediatamente — não depende do fluxo seguinte
+    if(user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_home:val})}).catch(()=>{});
+    }
+  }
+  go('s-bairro-trabalha');
+  setTimeout(()=>{const el=document.getElementById('f-bairro-trabalha');if(el)el.focus();},500);
+}
+function saveBairroTrabalha(){
+  const val=document.getElementById('f-bairro-trabalha').value.trim();
+  if(val){
+    user.neighborhood_work=val;
+    if(user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({neighborhood_work:val})}).catch(()=>{});
+    }
+  }
+  afterBairros();
+}
+
+// ═══════════════════════════════════════════════
+// WHATSAPP — window.open direto
+// ═══════════════════════════════════════════════
+function prepareWhatsApp(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  const mn=user.member_number||'';
+  const msg=encodeURIComponent(`Olá! Sou ${fn||'novo membro'}${mn?' (nº '+mn+')':''} e acabei de montar meu perfil no Fredinho. Quero receber meus convites por aqui.`);
+  window._waLink=`https://wa.me/${FREDINHO_WA}?text=${msg}`;
+}
+function onWhatsAppClick(){
+  if(!window._waLink)prepareWhatsApp();
+  window.open(window._waLink,'_blank');
+  const now=new Date().toISOString();
+  const consentText='Usuário clicou em Abrir WhatsApp e foi direcionado para wa.me/5521967227832 com mensagem de opt-in explícita';
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    // Consentimento registrado na tabela consents (lugar correto para auditoria)
+    saveConsent('whatsapp',consentText,'clicked_open_whatsapp');
+  }
+  user.whatsapp_sent=true;
+  // Jornada termina aqui — vai direto para celebração sem voltar a telas anteriores
+  goToCelebration();
+}
+function afterBairros(){go('s-whatsapp');}
+
+// ═══════════════════════════════════════════════
+// PUSH
+// ═══════════════════════════════════════════════
+function openPushScreen(){
+  // Mostra bloco correto para o dispositivo, depois navega
+  const android=document.getElementById('push-android');
+  const ios=document.getElementById('push-ios');
+  if(android&&ios){
+    if(isIOS){ios.style.display='block';android.style.display='none';}
+    else{android.style.display='block';ios.style.display='none';}
+  }
+  go('s-push');
+}
+async function requestPushFromCTA(){
+  if(isIOS&&!isInStandaloneMode){
+    toast('Siga os passos acima para instalar e depois ativar 👆');
+    setTimeout(()=>{go('s-whatsapp');},3000);return;
+  }
+  if(!('Notification' in window)||!('PushManager' in window)){go('s-whatsapp');return;}
+  try{
+    const permission=await Notification.requestPermission();
+    if(permission==='granted'){await savePushToken();toast('Notificações ativas! ✓');setTimeout(()=>goToCelebration(),700);return;}
+    else{toast('Permissão não concedida');}
+  }catch(e){console.warn('[Push]',e);}
+  go('s-whatsapp');
+}
+async function savePushToken(){
+  if(!swRegistration){try{swRegistration=await navigator.serviceWorker.ready;}catch(e){return;}}
+  try{
+    const sub=await swRegistration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8Array(VAPID_PUBLIC_KEY)});
+    const j=sub.toJSON();
+    if(!user.user_id||user.user_id.startsWith('local_'))return;
+    await fetch(`${SB_URL}/rest/v1/push_tokens`,{method:'POST',headers:{...SB_H,'Prefer':'return=minimal'},body:JSON.stringify({user_id:user.user_id,endpoint:j.endpoint,p256dh:j.keys?.p256dh,auth:j.keys?.auth,platform:isIOS?'ios_pwa':'web',active:true,created_at:new Date().toISOString()})});
+  }catch(e){console.warn('[Push] token:',e);}
+}
+
+// ═══════════════════════════════════════════════
+// EMAIL
+// ═══════════════════════════════════════════════
+function onEmailInput(){
+  const val=document.getElementById('f-email').value.trim();
+  const btn=document.getElementById('email-btn');
+  const ul=document.getElementById('ul-email');
+  const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  if(btn){btn.style.opacity=valid?'1':'0.4';btn.style.pointerEvents=valid?'all':'none';}
+  if(ul)ul.style.transform=valid?'scaleX(1)':'scaleX(0)';
+}
+async function saveEmail(){
+  const val=document.getElementById('f-email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val))return;
+  user.email=val;
+  user.email_confirmed=true;
+  const now=new Date().toISOString();
+  const consentText='Usuário informou e-mail e confirmou recebimento de convites personalizados pelo Fredinho';
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({email:val,email_opt_in:true,email_opt_in_at:now})
+    }).catch(()=>{});
+    saveConsent('email',consentText,'confirmed_email');
+  }
+  // Dispara e-mail de boas-vindas via Edge Function
+  fetch(`${SB_URL}/functions/v1/send-welcome-email`,{
+    method:'POST',
+    headers:{...SB_H,'Content-Type':'application/json'},
+    body:JSON.stringify({email:val,name:user.name,archetype:calcArchetype().primary})
+  }).catch(()=>{});
+  if(user._semCanal){goToCelebration();}else{go('s-telegram');}
+}
+function goToEmailOrCelebration(){
+  if(!user.email){go('s-email');}
+  else{goToCelebration();}
+}
+
+// Pulou o botão do WhatsApp → oferece digitar o número
+function afterWhatsAppSkip(){
+  go('s-phone');
+}
+
+// Pulou o campo de telefone → se tem email encerra, senão pede email ("sem canal")
+function afterPhoneSkip(){
+  if(user.email){goToCelebration();return;}
+  user._semCanal=true; // flag: próximo skip do email encerra direto
+  go('s-email');
+}
+
+// Skip do email: na primeira vez vai para telegram; se veio do "sem canal" encerra
+function skipEmail(){
+  if(user._semCanal){goToCelebration();return;}
+  go('s-telegram');
+}
+
+// ═══════════════════════════════════════════════
+// TELEFONE (WhatsApp opt-in)
+// ═══════════════════════════════════════════════
+function onPhoneInput(){
+  const raw=document.getElementById('f-phone').value.replace(/\D/g,'');
+  const btn=document.getElementById('phone-btn');
+  const ul=document.getElementById('ul-phone');
+  const valid=raw.length>=10;
+  if(btn){btn.style.opacity=valid?'1':'0.4';btn.style.pointerEvents=valid?'all':'none';}
+  if(ul)ul.style.transform=valid?'scaleX(1)':'scaleX(0)';
+}
+async function savePhone(){
+  const raw=document.getElementById('f-phone').value.replace(/\D/g,'');
+  if(raw.length<10)return;
+  const e164='+55'+raw;
+  user.phone=e164;
+  const now=new Date().toISOString();
+  const consentText='Usuário informou telefone e autorizou envio de convites personalizados pelo WhatsApp';
+  if(user.user_id&&!user.user_id.startsWith('local_')){
+    fetch(`${SB_URL}/rest/v1/users?user_id=eq.${user.user_id}`,{
+      method:'PATCH',headers:SB_H,
+      body:JSON.stringify({phone:e164,whatsapp_opt_in:true,whatsapp_opt_in_at:now})
+    }).catch(()=>{});
+    saveConsent('whatsapp',consentText,'confirmed_phone');
+  }
+  goToCelebration();
+}
+
+// ═══════════════════════════════════════════════
+// CELEBRAÇÃO
+// ═══════════════════════════════════════════════
+function goToCelebration(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  document.getElementById('final-member-num').textContent=user.member_number||'—';
+  if(fn)document.getElementById('final-headline').textContent=`${fn}, seu perfil está pronto.`;
+  launchConfetti(ARCH[calcArchetype().primary]?.ring||'#8B3A1E');
+  go('s-final');
+}
+
+// ═══════════════════════════════════════════════
+// SUPABASE — SALVAR
+// ═══════════════════════════════════════════════
+async function saveInitial(){
+  // Sempre cria registro novo — cada abertura é um usuário diferente
+  user.member_number=String(1000+Math.floor(Math.random()*9000));
+  try{
+    // Resolve rid: preferência para source_restaurant_id (uuid direto de ?src=)
+    // fallback para busca por slug (compatibilidade com ?r=)
+    let rid=user.source_restaurant_id||null;
+    if(!rid&&user.source_restaurant){
+      const rRes=await fetch(`${SB_URL}/rest/v1/restaurants?slug=eq.${user.source_restaurant}&select=id`,{headers:SB_H});
+      const rData=await rRes.json();
+      rid=rData[0]?.id||null;
+      if(rid) user.source_restaurant_id=rid;
+    }
+
+    const res=await fetch(`${SB_URL}/rest/v1/users`,{
+      method:'POST',headers:{...SB_H,'Prefer':'return=representation'},
+      body:JSON.stringify({
+        name:user.name||null,
+        member_number:user.member_number,
+        source_restaurant_id:rid,
+        source_url:window.location.href,
+        created_at:new Date().toISOString(),
+      })
+    });
+    if(!res.ok){const err=await res.text();console.warn('[saveInitial] HTTP',res.status,err);throw new Error(err);}
+    const d=await res.json();
+    if(d[0]){user.user_id=d[0].user_id||d[0].id||null;updateTelegramLink();}
+    console.log('[saveInitial] user_id =',user.user_id);
+
+    // Vincula usuário ao restaurante nas duas tabelas (dashboard lê user_restaurants)
+    if(rid&&user.user_id&&!user.user_id.startsWith('local_')){
+      fetch(`${SB_URL}/rest/v1/restaurant_optins`,{
+        method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=minimal'},
+        body:JSON.stringify({user_id:user.user_id,restaurant_id:rid})
+      }).catch(()=>{});
+      fetch(`${SB_URL}/rest/v1/user_restaurants`,{
+        method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=minimal'},
+        body:JSON.stringify({user_id:user.user_id,restaurant_id:rid})
+      }).catch(()=>{});
+    }
+
+  }catch(e){
+    if(!user.user_id){user.user_id='local_'+Date.now();}
+    console.warn('[Fredinho] offline — usando ID local');
+  }
+}
+async function saveProgress(final=false){
+  if(!user.user_id||user.user_id.startsWith('local_'))return;
+  const arch=calcArchetype();
+  const ob={
+    user_id:user.user_id,
+    category:'gastronomia',
+    liked_ids:liked.map(e=>e.id),
+    cards_completed:ANCHORS.length+deckPos,
+    primary_archetype:arch.primary||null,
+    secondary_archetype:arch.secondary||null,
+    axis_foodie:axisScores.foodie||0,
+    axis_classico:axisScores.classico||0,
+    axis_sustentavel:axisScores.sustentavel||0,
+    axis_social:axisScores.social||0,
+    axis_exclusivo:axisScores.exclusivo||0,
+    axis_bohemio:axisScores.bohemio||0,
+    tier:getTier(),
+    tier_score:tierScore,
+    last_card_at:new Date().toISOString(),
+    onboarding_completed:false,
+  };
+  if(final){ob.onboarding_completed=true;ob.completed_at=new Date().toISOString();}
+  const pr={
+    user_id:user.user_id,
+    alimentacao:user.alimentacao||null,
+    dieta:user.dieta.length?user.dieta:null,
+    contextos:user.contextos.length?user.contextos:null,
+    filhos:user.filhos.length?user.filhos:null,
+    alergia_grave:user.alergia_grave||false,
+    alergias:user.alergias.length?user.alergias:null,
+    vegano:user.vegano||false,
+    // price_min / price_max / price_avg: calculados futuramente com base
+    // no histórico de consumo real — não disponível neste momento do onboarding
+    updated_at:new Date().toISOString(),
+  };
+  try{
+    await fetch(`${SB_URL}/rest/v1/user_onboardings`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(ob)});
+    await fetch(`${SB_URL}/rest/v1/user_preferences`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(pr)});
+  }catch(e){console.warn('saveProgress:',e);}
+}
+
+// ═══════════════════════════════════════════════
+// CARDS + GESTOS
+// ═══════════════════════════════════════════════
+function updateProgress(){
+  const total=ANCHORS.length+activeDeck.filter(c=>c.pair===1).length*2;
+  const done=anchorPhase?anchorCardIdx:(ANCHORS.length+deckPos);
+  const pct=Math.min(100,Math.round(done/Math.max(total,1)*100));
+  document.getElementById('t-prog').style.width=pct+'%';
+  document.getElementById('t-cnt').textContent=pct+'%';
+}
+function showFeedback(msg){const el=document.getElementById('t-feedback');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1700);}
+function makeCard(exp){
+  const d=document.createElement('div');d.className='swipe-card';d.dataset.id=exp.id;
+  const tmax=exp.tier_max||0;
+  const tierClass=tmax>=400?'tier-high':tmax>=150?'tier-mid':'tier-low';
+  const photoUrl=`https://images.unsplash.com/photo-${exp.photo_unsplash||'1414235077428-338140e5f810'}?w=800&q=80&auto=format&fit=crop`;
+  d.innerHTML=`<div class="card-visual"><img class="card-img" src="${photoUrl}" alt="${exp.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-fallback"><div class="card-img-fallback-name">${exp.name}</div><div class="card-img-fallback-line"></div></div><div class="card-badge">${exp.cat}</div></div><div class="card-divider"></div><div class="card-body"><div class="card-eyebrow"><div class="card-round-dot"></div><span class="card-cat-label">${exp.cat}</span></div><div class="card-title">${exp.name}</div><div class="card-desc">${exp.desc}</div><div class="card-price-row ${tierClass}"><div class="cpr-price"><span class="cpr-label">por pessoa</span><span class="cpr-val">${exp.price}</span></div><div class="cpr-dur"><span class="cpr-label">duração</span><span class="cpr-val">${exp.dur}</span></div></div></div><div class="stamp stamp-yes">ADORO</div><div class="stamp stamp-no">PASSO</div>`;
+  return d;
+}
+function setPos(card,pos,animate){
+  if(animate)card.style.transition='transform .32s var(--tr)';else card.style.transition='none';
+  if(pos===0){card.style.transform='';card.style.zIndex='5';}
+  else if(pos===1){card.style.transform='scale(.96) translateY(13px)';card.style.zIndex='4';}
+  else{card.style.transform='scale(.92) translateY(26px)';card.style.zIndex='3';}
+}
+function bindTop(){
+  const top=document.getElementById('card-stack').lastElementChild;if(!top)return;
+  activeCard=top;
+  top.addEventListener('touchstart',onStart,{passive:true});
+  top.addEventListener('touchmove',onMove,{passive:false});
+  top.addEventListener('touchend',onEnd,{passive:true});
+  top.addEventListener('mousedown',onStart);
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+}
+function gx(e){return e.touches?e.touches[0].clientX:e.clientX;}
+function onStart(e){if(swipeLocked)return;isDragging=true;startX=gx(e);currentX=0;if(activeCard)activeCard.style.transition='none';}
+function onMove(e){
+  if(!isDragging||!activeCard||swipeLocked)return;if(e.cancelable)e.preventDefault();
+  currentX=gx(e)-startX;
+  activeCard.style.transform=`translateX(${currentX}px) rotate(${currentX*.065}deg) translateY(-${Math.abs(currentX)*.025}px)`;
+  const yes=activeCard.querySelector('.stamp-yes'),no=activeCard.querySelector('.stamp-no'),t=38;
+  yes.style.opacity=currentX>t?Math.min(1,(currentX-t)/48):0;
+  no.style.opacity=currentX<-t?Math.min(1,(-currentX-t)/48):0;
+}
+function onEnd(){
+  if(!isDragging)return;isDragging=false;
+  document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onEnd);
+  if(swipeLocked||!activeCard)return;
+  if(currentX>88)doSwipe('right');
+  else if(currentX<-88)doSwipe('left');
+  else{activeCard.style.transition='transform .45s var(--tr)';activeCard.style.transform='';activeCard.querySelector('.stamp-yes').style.opacity=0;activeCard.querySelector('.stamp-no').style.opacity=0;}
+}
+function swipeBtn(dir){
+  if(swipeLocked)return;
+  if(!activeCard)activeCard=document.getElementById('card-stack').lastElementChild;
+  if(!activeCard)return;
+  activeCard.querySelector(dir==='right'?'.stamp-yes':'.stamp-no').style.opacity='1';
+  currentX=dir==='right'?200:-200;setTimeout(()=>doSwipe(dir),80);
+}
+
+// ═══════════════════════════════════════════════
+// PARTILHAR
+// ═══════════════════════════════════════════════
+function _buildShareUrl(){
+  const base=window.location.href.split('?')[0];
+  if(user.source_restaurant_id)
+    return base+`?src=${user.source_restaurant_id}`+(user.convite_ref?`&ref=${user.convite_ref}`:'');
+  if(user.source_restaurant) return base+`?r=${user.source_restaurant}`;
+  return base;
+}
+function shareWithFriend(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  const url=_buildShareUrl();
+  const txt=fn?`${fn} me convidou para montar um perfil gastronômico no Fredinho. Leva dois minutos.`:`Me convidaram para montar um perfil gastronômico no Fredinho.`;
+  if(navigator.share)navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+'\n'+url);toast('Link copiado!');}
+}
+function shareWithRestaurant(){
+  const fn=user.name?user.name.split(' ')[0]:'';
+  const url=_buildShareUrl();
+  const txt=fn?`${fn} quer receber convites personalizados do seu restaurante. O perfil já está pronto.`:`Um cliente quer receber convites personalizados.`;
+  if(navigator.share)navigator.share({title:'Fredinho por Weissmann',text:txt,url}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+'\n'+url);toast('Link copiado!');}
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CONSENTIMENTOS — auditoria Meta / Telegram
+// ═══════════════════════════════════════════════
+async function saveConsent(channel,consentText,action){
+  if(!user.user_id||user.user_id.startsWith('local_'))return;
+  try{
+    await fetch(`${SB_URL}/rest/v1/consents`,{
+      method:'POST',
+      headers:{...SB_H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        user_id:user.user_id,
+        channel,
+        action,
+        consent_text:consentText,
+        consent_timestamp:new Date().toISOString(),
+        user_agent:navigator.userAgent,
+        source_url:window.location.href,
+      })
+    });
+  }catch(e){console.warn('[Consent]',e);}
+}
+
+function launchConfetti(color){
+  const cols=[color,'#D4A053','#F2E8DC','#B85C38'];
+  for(let i=0;i<40;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-p';
+    const sz=6+Math.random()*7;
+    p.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${2+Math.random()*2.2}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),4800);
+  },i*45);
+}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2800);}
+function shake(id){const el=document.getElementById(id);el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),500);}
+</script>
+</body>
+</html>
