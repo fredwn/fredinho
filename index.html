@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>Fredinho por WEISSMANN</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.unsplash.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -25,9 +27,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;overscroll-behavior:none;touch-action:manipulation}
 
-.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .42s var(--tr),transform .42s var(--tr);transform:translateY(20px)}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .22s var(--tr),transform .22s var(--tr);transform:translateY(14px)}
 .screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
-.screen.exit{opacity:0;transform:translateY(-20px);pointer-events:none}
+.screen.exit{opacity:0;transform:translateY(-14px);pointer-events:none}
 .grain{position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .orb-top{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:560px;height:560px;background:radial-gradient(ellipse at 50% 30%,rgba(139,58,30,.06) 0%,transparent 65%);pointer-events:none;z-index:0}
 .top-rule{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--terra) 35%,var(--ambar) 65%,transparent);opacity:.3;z-index:1}
@@ -37,7 +39,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 .btn-p:hover{background:var(--terra2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(139,58,30,.25)}
 .btn-p:active{transform:scale(.97)}
 
-@keyframes fsu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fsu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* ════ HOOK ════ */
 #s-welcome{background:var(--bg);justify-content:center}
@@ -48,38 +50,38 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 .wm-w{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:400;letter-spacing:4.5px;text-transform:uppercase;color:var(--ambar)}
 .hook-body{text-align:center;margin-bottom:48px}
 .hook-line{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,8.5vw,46px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme);opacity:0;display:block}
-.hook-line.l1{animation:fsu .8s .1s var(--tr) forwards}
-.hook-line.l2{animation:fsu .8s .3s var(--tr) forwards}
-.hook-line.l3{animation:fsu .8s .5s var(--tr) forwards}
+.hook-line.l1{animation:fsu .35s .05s var(--tr) forwards}
+.hook-line.l2{animation:fsu .35s .15s var(--tr) forwards}
+.hook-line.l3{animation:fsu .35s .25s var(--tr) forwards}
 .hook-line em{font-style:normal;font-weight:700;color:var(--terra)}
-.hook-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,4vw,20px);font-style:italic;color:var(--pedra);margin-top:22px;opacity:0;animation:fsu .7s .72s var(--tr) forwards;display:block}
-.wlc-cta{opacity:0;animation:fsu .6s 1s var(--tr) forwards;width:100%;max-width:290px}
-.wlc-source{font-size:11px;color:rgba(107,94,82,.5);font-weight:300;text-align:center;margin-top:16px;opacity:0;animation:fsu .5s 1.15s var(--tr) forwards;letter-spacing:.3px}
+.hook-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,4vw,20px);font-style:italic;color:var(--pedra);margin-top:22px;opacity:0;animation:fsu .32s .36s var(--tr) forwards;display:block}
+.wlc-cta{opacity:0;animation:fsu .32s .44s var(--tr) forwards;width:100%;max-width:290px}
+.wlc-source{font-size:11px;color:rgba(107,94,82,.5);font-weight:300;text-align:center;margin-top:16px;opacity:0;animation:fsu .32s .5s var(--tr) forwards;letter-spacing:.3px}
 .wlc-source strong{color:var(--ambar);font-weight:500;opacity:.8}
 
 /* ════ NOME ════ */
 #s-name{background:var(--bg);justify-content:center}
 .name-inner{position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center}
-.name-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px;opacity:0;animation:fsu .6s .05s var(--tr) forwards}
+.name-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px;opacity:0;animation:fsu .32s.05s var(--tr) forwards}
 .name-hl{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,9vw,48px);font-weight:300;font-style:italic;line-height:1.1;color:var(--creme);margin-bottom:44px;opacity:0;animation:fsu .7s .18s var(--tr) forwards}
 .name-hl em{font-style:normal;font-weight:600;color:var(--terra)}
-.name-field-wrap{width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .32s var(--tr) forwards}
+.name-field-wrap{width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .32s.32s var(--tr) forwards}
 .name-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid rgba(28,20,16,.15);padding:6px 0 16px;font-size:32px;font-weight:300;color:var(--creme);outline:none;font-family:'Cormorant Garamond',serif;font-style:italic;caret-color:var(--terra);-webkit-appearance:none}
 .name-input::placeholder{color:rgba(28,20,16,.18)}
 .name-underline{position:absolute;bottom:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--terra),var(--ambar));transform:scaleX(0);transform-origin:left;transition:transform .45s var(--tr)}
 .name-input:focus~.name-underline{transform:scaleX(1)}
 .name-cta{opacity:0;transform:translateY(8px);transition:opacity .35s var(--tr),transform .35s var(--tr);pointer-events:none}
 .name-cta.show{opacity:1;transform:translateY(0);pointer-events:all}
-.name-skip{font-size:12px;color:var(--pedra);font-weight:300;text-align:center;margin-top:14px;cursor:pointer;transition:color .2s;opacity:0;animation:fsu .5s .9s var(--tr) forwards}
+.name-skip{font-size:12px;color:var(--pedra);font-weight:300;text-align:center;margin-top:14px;cursor:pointer;transition:color .2s;opacity:0;animation:fsu .32s .4s var(--tr) forwards}
 .name-skip:hover{color:var(--creme)}
 
 /* ════ MICRO-CTA base ════ */
 .mcta-inner{position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center}
-.mcta-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:16px;opacity:0;animation:fsu .6s .05s var(--tr) forwards}
+.mcta-eyebrow{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:16px;opacity:0;animation:fsu .32s.05s var(--tr) forwards}
 .mcta-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7.5vw,40px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme);margin-bottom:10px;opacity:0;animation:fsu .7s .15s var(--tr) forwards}
 .mcta-title em{font-style:normal;font-weight:600;color:var(--terra)}
-.mcta-sub{font-size:13px;color:var(--pedra);line-height:1.7;font-weight:300;margin-bottom:32px;opacity:0;animation:fsu .6s .25s var(--tr) forwards}
-.mcta-actions{display:flex;flex-direction:column;gap:10px;opacity:0;animation:fsu .6s .38s var(--tr) forwards}
+.mcta-sub{font-size:13px;color:var(--pedra);line-height:1.7;font-weight:300;margin-bottom:32px;opacity:0;animation:fsu .32s.25s var(--tr) forwards}
+.mcta-actions{display:flex;flex-direction:column;gap:10px;opacity:0;animation:fsu .32s.38s var(--tr) forwards}
 .mcta-skip{font-size:12px;color:rgba(107,94,82,.45);text-align:center;margin-top:16px;cursor:pointer;transition:color .2s}
 .mcta-skip:hover{color:var(--pedra)}
 
@@ -90,7 +92,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 .email-input:focus~.email-underline{transform:scaleX(1)}
 
 /* ════ CHIPS bairro ════ */
-.chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;opacity:0;animation:fsu .6s .25s var(--tr) forwards}
+.chips-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;opacity:0;animation:fsu .32s.25s var(--tr) forwards}
 .chip{background:rgba(28,20,16,.04);border:1.5px solid rgba(28,20,16,.12);border-radius:4px;padding:13px 10px;cursor:pointer;transition:border-color .15s,background .15s;font-size:13px;color:var(--creme2);font-weight:400;user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;line-height:1.3}
 .chip.sel{border-color:var(--terra);background:rgba(139,58,30,.08);color:var(--creme);font-weight:500}
 .chip:active{opacity:.7}
@@ -220,7 +222,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow" id="retomar-eyebrow">Bem-vindo de volta</div>
     <h2 class="mcta-title" id="retomar-title">Por onde a gente<br>te <em>encontra?</em></h2>
     <p class="mcta-sub" id="retomar-sub">Informe o WhatsApp ou e-mail que usou no cadastro.</p>
-    <div style="width:100%;position:relative;margin-bottom:8px;opacity:0;animation:fsu .6s .25s var(--tr) forwards">
+    <div style="width:100%;position:relative;margin-bottom:8px;opacity:0;animation:fsu .32s.25s var(--tr) forwards">
       <input class="name-input" id="f-retomar" type="text" placeholder="WhatsApp ou e-mail"
         oninput="onRetomarInput()" onkeydown="if(event.key==='Enter')buscarPerfil()"
         style="font-size:22px" autocorrect="off" autocapitalize="none" spellcheck="false">
@@ -262,11 +264,11 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 <div id="s-howto" class="screen">
   <div class="grain"></div><div class="orb-top" style="opacity:.25"></div>
   <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
-    <div style="opacity:0;animation:fsu .6s .05s var(--tr) forwards">
+    <div style="opacity:0;animation:fsu .32s.05s var(--tr) forwards">
       <div style="font-size:10px;letter-spacing:3.5px;text-transform:uppercase;color:var(--terra);font-weight:600;margin-bottom:18px">Como funciona</div>
       <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(30px,8vw,42px);font-weight:300;font-style:italic;line-height:1.15;color:var(--creme);margin-bottom:36px">Vamos mostrar<br><em style="font-style:normal;font-weight:600;color:var(--terra)">experiências.</em><br>Você reage.</h2>
     </div>
-    <div style="display:flex;flex-direction:column;gap:20px;margin-bottom:44px;opacity:0;animation:fsu .6s .22s var(--tr) forwards">
+    <div style="display:flex;flex-direction:column;gap:20px;margin-bottom:44px;opacity:0;animation:fsu .32s.22s var(--tr) forwards">
       <div style="display:flex;align-items:flex-start;gap:14px">
         <div style="width:38px;height:38px;border-radius:4px;background:rgba(139,58,30,.1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">♥</div>
         <div><div style="font-size:14px;font-weight:600;color:var(--creme);margin-bottom:3px">Curtiu? Deslize para a direita</div><div style="font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300">Ou toque no coração. A experiência entra no seu perfil.</div></div>
@@ -280,7 +282,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
         <div><div style="font-size:14px;font-weight:600;color:var(--creme);margin-bottom:3px">Seu perfil gastronômico emerge</div><div style="font-size:12px;color:var(--pedra);line-height:1.55;font-weight:300">Cada reação revela o que você realmente quer. Sem formulário.</div></div>
       </div>
     </div>
-    <div style="opacity:0;animation:fsu .6s .42s var(--tr) forwards">
+    <div style="opacity:0;animation:fsu .32s.42s var(--tr) forwards">
       <button class="btn-p" onclick="go('s-name')">Entendi, vamos lá →</button>
       <p style="font-size:11px;color:rgba(107,94,82,.5);text-align:center;margin-top:14px;font-weight:300">Aproximadamente 22 cards. Menos de 2 minutos.</p>
     </div>
@@ -354,7 +356,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow">Canal de avisos</div>
     <h2 class="mcta-title">Quer ser avisado quando<br>surgir uma <em>mesa assim?</em></h2>
     <p class="mcta-sub">Conecte o Telegram para receber seus convites antes de todo mundo. Só o que foi feito para você — sem spam.</p>
-    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .3s var(--tr) forwards">
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .32s.3s var(--tr) forwards">
       <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Conectar Telegram</strong>, você autoriza o Fredinho a enviar mensagens pelo bot <strong>@ListadoFredinho_bot</strong>. Você pode cancelar a qualquer momento digitando /sair no bot.</p>
     </div>
     <div class="mcta-actions">
@@ -372,7 +374,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow">Contexto</div>
     <h2 class="mcta-title">Onde você <em>mora?</em></h2>
     <p class="mcta-sub" style="margin-bottom:32px">Ajuda a sugerir experiências perto de você.</p>
-    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .32s.28s var(--tr) forwards">
       <input class="name-input" id="f-bairro-mora" type="text" placeholder="Ex: Ipanema, Leblon, Tijuca…"
         autocorrect="off" spellcheck="false" style="font-size:26px"
         oninput="onBairroInput('mora')" onkeydown="if(event.key==='Enter')saveBairroMora()">
@@ -392,7 +394,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow">Contexto</div>
     <h2 class="mcta-title">Onde costuma <em>almoçar?</em></h2>
     <p class="mcta-sub" style="margin-bottom:32px">Pode listar mais de um lugar — separados por vírgula.</p>
-    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+    <div style="width:100%;position:relative;margin-bottom:40px;opacity:0;animation:fsu .32s.28s var(--tr) forwards">
       <input class="name-input" id="f-bairro-trabalha" type="text" placeholder="Ex: Centro, Botafogo, Barra…"
         autocorrect="off" spellcheck="false" style="font-size:26px"
         oninput="onBairroInput('trabalha')" onkeydown="if(event.key==='Enter')saveBairroTrabalha()">
@@ -409,7 +411,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 <div id="s-push" class="screen">
   <div class="grain"></div><div class="orb-top" style="opacity:.2"></div>
   <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
-    <div style="opacity:0;animation:fsu .6s .05s var(--tr) forwards;margin-bottom:6px">
+    <div style="opacity:0;animation:fsu .32s.05s var(--tr) forwards;margin-bottom:6px">
       <div class="mcta-eyebrow" style="animation:none;opacity:1">Notificações</div>
     </div>
     <h2 class="mcta-title">Receba mesmo com<br>o app <em>fechado</em></h2>
@@ -453,7 +455,7 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
       </div>
     </div>
 
-    <div style="opacity:0;animation:fsu .6s .45s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
+    <div style="opacity:0;animation:fsu .32s.45s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
       <button class="btn-p" id="push-btn" onclick="requestPushFromCTA()">Ativar notificações →</button>
       <p class="mcta-skip" style="opacity:1" onclick="go('s-whatsapp')">Agora não</p>
     </div>
@@ -482,13 +484,13 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow">Último passo</div>
     <h2 class="mcta-title">Quer convites<br>pelo <em>WhatsApp?</em></h2>
     <p class="mcta-sub">Deixa o número aqui — a gente manda só o que foi feito para você. Sem spam.</p>
-    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .32s.28s var(--tr) forwards">
       <input class="name-input" id="f-phone" type="tel" inputmode="numeric" placeholder="(21) 99999-9999"
         autocorrect="off" spellcheck="false" style="font-size:26px"
         oninput="onPhoneInput()" onkeydown="if(event.key==='Enter')savePhone()">
       <div class="name-underline" id="ul-phone"></div>
     </div>
-    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .38s var(--tr) forwards">
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .32s.38s var(--tr) forwards">
       <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao confirmar, você autoriza o Fredinho a enviar convites personalizados pelo WhatsApp. Cancele a qualquer momento respondendo <strong>SAIR</strong>.</p>
     </div>
     <div class="mcta-actions">
@@ -505,13 +507,13 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
     <div class="mcta-eyebrow">Canal de avisos</div>
     <h2 class="mcta-title">Por onde te<br><em>encontramos?</em></h2>
     <p class="mcta-sub">Quando surgir algo feito para você, enviamos por aqui. Poucos e-mails, sempre com algo que vale a atenção.</p>
-    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .6s .28s var(--tr) forwards">
+    <div style="width:100%;position:relative;margin-bottom:12px;opacity:0;animation:fsu .32s.28s var(--tr) forwards">
       <input class="email-input" id="f-email" type="email" inputmode="email" placeholder="seu@email.com"
         autocorrect="off" autocapitalize="none" spellcheck="false"
         oninput="onEmailInput()" onkeydown="if(event.key==='Enter')saveEmail()">
       <div class="email-underline" id="ul-email"></div>
     </div>
-    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .6s .38s var(--tr) forwards">
+    <div style="background:rgba(139,58,30,.06);border:1px solid rgba(139,58,30,.15);border-radius:4px;padding:14px 16px;margin-bottom:24px;opacity:0;animation:fsu .32s.38s var(--tr) forwards">
       <p style="font-size:11px;color:var(--pedra);line-height:1.65;font-weight:300">Ao tocar em <strong>Confirmar</strong>, você autoriza o Fredinho a enviar convites personalizados para este endereço. Você pode cancelar a qualquer momento respondendo ao e-mail com <strong>SAIR</strong>.</p>
     </div>
     <div class="mcta-actions">
@@ -525,15 +527,15 @@ html,body{height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sa
 <div id="s-final" class="screen">
   <div class="grain"></div><div class="orb-top" style="opacity:.15"></div>
   <div style="position:relative;z-index:1;width:100%;max-width:400px;padding:0 36px;display:flex;flex-direction:column;min-height:100vh;justify-content:center">
-    <div style="opacity:0;animation:fsu .6s .1s var(--tr) forwards;margin-bottom:32px">
+    <div style="opacity:0;animation:fsu .32s.1s var(--tr) forwards;margin-bottom:32px">
       <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pedra);margin-bottom:6px">Weissmann, acesso nº</div>
       <div id="final-member-num" style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:300;color:var(--ambar);letter-spacing:4px;line-height:1">—</div>
     </div>
-    <div style="opacity:0;animation:fsu .6s .32s var(--tr) forwards;margin-bottom:40px">
+    <div style="opacity:0;animation:fsu .32s.32s var(--tr) forwards;margin-bottom:40px">
       <div id="final-headline" style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,7.5vw,38px);font-weight:300;font-style:italic;line-height:1.2;color:var(--creme)">Seu perfil está pronto.</div>
       <div style="font-size:14px;color:var(--pedra);margin-top:10px;line-height:1.65;font-weight:300">Os próximos convites chegarão quando a experiência encaixar exatamente no que você gosta.</div>
     </div>
-    <div style="opacity:0;animation:fsu .6s .52s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
+    <div style="opacity:0;animation:fsu .32s.52s var(--tr) forwards;display:flex;flex-direction:column;gap:10px">
       <div style="background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:4px;padding:20px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="shareWithFriend()">
         <div style="font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--creme);margin-bottom:5px">Compartilhar com um amigo</div>
         <div style="font-size:12px;color:var(--pedra);line-height:1.6;margin-bottom:12px">Queremos conhecer melhor seus amigos para criar oportunidades cada vez melhores.</div>
@@ -699,7 +701,7 @@ function pwaDismiss(){document.getElementById('pwa-banner').classList.remove('sh
 // ═══════════════════════════════════════════════
 const SCREEN_PROG={'s-welcome':0,'s-howto':5,'s-name':10,'s-retomar':5,'s-survey':20,'s-tinder':30,'s-email':75,'s-telegram':70,'s-bairro-mora':82,'s-bairro-trabalha':87,'s-whatsapp':92,'s-phone':95,'s-push':90,'s-final':100};
 const BACK_SCREENS=['s-howto','s-name','s-retomar','s-email','s-telegram','s-bairro-mora','s-bairro-trabalha','s-whatsapp','s-phone'];
-const STOP_SCREENS=['s-survey','s-tinder','s-email','s-telegram','s-bairro-mora','s-bairro-trabalha'];
+const STOP_SCREENS=['s-howto','s-name','s-survey','s-tinder','s-email','s-telegram','s-bairro-mora','s-bairro-trabalha','s-whatsapp','s-phone','s-push'];
 let navStack=[];
 function go(id){
   if(navStack[navStack.length-1]!==id)navStack.push(id);
@@ -713,7 +715,7 @@ function _syncNav(id){
   const fill=document.getElementById('g-prog-fill');
   const prog=document.getElementById('g-prog');
   const pct=SCREEN_PROG[id];
-  if(prog)prog.classList.toggle('vis',id!=='s-welcome'&&id!=='s-final');
+  if(prog)prog.classList.toggle('vis',id!=='s-welcome'&&id!=='s-retomar'&&id!=='s-final');
   if(fill&&pct!==undefined)fill.style.width=pct+'%';
   const back=document.getElementById('g-back');
   if(back)back.classList.toggle('vis',BACK_SCREENS.includes(id));
@@ -979,7 +981,8 @@ async function goSwipe(skip=false){
   user.name=skip?'':document.getElementById('f-name').value.trim();
   document.getElementById('t-user-name').textContent=user.name?user.name.split(' ')[0]:'';
   saveInitial(); // fire-and-forget
-  if(!experiencesLoaded){toast('Carregando…');await fetchExperiences();}
+  go('s-tinder'); // navega imediatamente sem esperar fetch
+  if(!experiencesLoaded){await fetchExperiences();}
   anchorsDone=false;anchorPhase=true;anchorCardIdx=0;tierScore=0;consecutiveLikes=0;
   const stack=document.getElementById('card-stack');
   stack.innerHTML='';activeCard=null;swipeLocked=false;
@@ -988,7 +991,7 @@ async function goSwipe(skip=false){
   document.getElementById('t-cnt').textContent='';
   if(ANCHORS.length>1){const back=makeCard(ANCHORS[1]);setPos(back,1,false);stack.appendChild(back);}
   const top=makeCard(ANCHORS[0]);setPos(top,0,false);stack.appendChild(top);
-  bindTop();go('s-tinder');
+  bindTop();
 }
 function afterAnchors(){anchorsDone=true;anchorPhase=false;showSurveyById('contexto');}
 function afterContextoFlow(){showSurveyById('alimentacao');}
