@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#EFEFED">
+<title>Convite — Fredinho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EFEFED;--terra:#8B3A1E;--creme:#1C1410;--pedra:#6B5E52;--ambar:#9A6B2E;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--creme);font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:400px;margin:0 auto;padding:48px 28px 64px;text-align:center}
+.wordmark{font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--pedra);opacity:.5;margin-bottom:48px}
+.titulo{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,7vw,36px);font-weight:300;font-style:italic;line-height:1.25;color:var(--creme);margin-bottom:8px}
+.subtitulo{font-size:13px;color:var(--pedra);margin-bottom:40px;line-height:1.6}
+.qr-wrap{background:#FAFAF8;border:1px solid rgba(28,20,16,.1);border-radius:8px;padding:28px;display:inline-block;margin-bottom:32px}
+.qr-wrap img{display:block;width:180px;height:180px}
+.instrucao{font-size:12px;color:var(--pedra);line-height:1.7;max-width:280px;margin:0 auto 40px}
+.instrucao strong{color:var(--creme)}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(139,58,30,.08);border:1px solid rgba(139,58,30,.2);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--terra);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">Fredinho</div>
+  <div class="titulo" id="exp-nome">Carregando...</div>
+  <div class="subtitulo">Seu convite está confirmado</div>
+
+  <div class="qr-wrap">
+    <img id="qr-img" src="" alt="QR Code do convite">
+  </div>
+
+  <p class="instrucao">
+    Apresente este <strong>QR Code</strong> na entrada do evento.<br>
+    Ele é único e intransferível.
+  </p>
+
+  <div class="badge">✓ Convite válido</div>
+</div>
+
+<script>
+const p = new URLSearchParams(window.location.search);
+const token = p.get("token") || "";
+const nome  = p.get("nome")  || "Experiência";
+
+document.getElementById("exp-nome").textContent = decodeURIComponent(nome);
+
+const qrData = encodeURIComponent(token);
+document.getElementById("qr-img").src =
+  `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=0&color=1C1410&bgcolor=FAFAF8&data=${qrData}`;
+</script>
+</body>
+</html>
