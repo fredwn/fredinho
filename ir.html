@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fredinho</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:#EFEFED;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
+  .loader{width:32px;height:32px;border:2.5px solid rgba(139,58,30,.15);border-top-color:#8B3A1E;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .erro{text-align:center;color:#6B5E52;font-size:14px;padding:24px}
+</style>
+</head>
+<body>
+<div id="root"><div class="loader"></div></div>
+<script>
+const SUPABASE_URL  = "https://jebhatmtzhoxoklfxzgh.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImplYmhhdG10emhveG9rbGZ4emdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2MDIxMjUsImV4cCI6MjA4NzE3ODEyNX0.9qyggg4VfxcHFtwM6yhR74Cb03xetRcw6WcGN6hDP2Q";
+
+const code = new URLSearchParams(window.location.search).get("c");
+
+if (!code) {
+  document.getElementById("root").innerHTML = '<div class="erro">Link inválido.</div>';
+} else {
+  fetch(`${SUPABASE_URL}/rest/v1/short_links?code=eq.${encodeURIComponent(code)}&select=url`, {
+    headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data?.[0]?.url) {
+      window.location.replace(data[0].url);
+    } else {
+      document.getElementById("root").innerHTML = '<div class="erro">Link não encontrado ou expirado.</div>';
+    }
+  })
+  .catch(() => {
+    document.getElementById("root").innerHTML = '<div class="erro">Erro ao carregar. Tente novamente.</div>';
+  });
+}
+</script>
+</body>
+</html>
